@@ -107,7 +107,7 @@ Notes about the auoscaling group:
 You can change this setting by editing the value of on_demand_percentage_above_base_capacity in asg.tf. You can require that all the EC2 will be launced using on-demand instances setting on_demand_percentage_above_base_capacity to 100. More details [here](https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstancesDistribution.html)
 
 
-## Instance used
+## Instances used
 
 The types of instances used on this tutorial are:
 
@@ -130,7 +130,7 @@ Since we are deploying a Kubernetes cluster, is **very** important that all the 
 
 ## Deploy
 
-We are now redy to deploy our infrastructure. First ask terraform to plan the execution with:
+We are now ready to deploy our infrastructure. First we ask terraform to plan the execution with:
 
 ```
 terraform plan
@@ -231,7 +231,7 @@ kubectl apply -f cluster-autoscaler-autodiscover.yaml
 
 ## Clean up
 
-**Remember** to clean all the previusly created resources when you have fished! We don't want surprises from AWS billing team:
+**Remember** to clean all the previously usly created resources when you have finished! We don't want surprises from AWS billing team:
 
 ```
 terraform destroy
