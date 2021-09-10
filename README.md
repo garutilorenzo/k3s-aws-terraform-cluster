@@ -16,7 +16,7 @@ Note that this tutorial uses AWS resources that are outside the AWS free tier, s
 ## Pre flight checklist
 
 Follow the prerequisites step on [this](https://learn.hashicorp.com/tutorials/terraform/aws-build?in=terraform/aws-get-started) link.
-Create a file named terraform.tfvars on the root of this repository and your AWS_ACCESS_KEY and AWS_SECRET_KEY, example:
+Create a file named terraform.tfvars on the root of this repository and add your AWS_ACCESS_KEY and AWS_SECRET_KEY, example:
 
 ```
 AWS_ACCESS_KEY = "xxxxxxxxxxxxxxxxx"
