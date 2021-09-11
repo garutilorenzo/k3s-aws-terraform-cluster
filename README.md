@@ -86,9 +86,9 @@ The final infrastructure will be made by:
  * one autoscaling group for the server nodes named "k3s_servers"
  * one autoscaling group for the worker nodes named "k3s_workers"
 * one internal load balancer that will route traffic to K3s servers
-* one tharget group that will check the health of our K3s server on port 6433
+* one target group that will check the health of our K3s server on port 6433
 
-the other resources created by terraform are:
+The other resources created by terraform are:
 
 * two launch templates (one for the servers and one for the workers) used by the autoscaling groups
 * an ssh key pair associated with each EC2 instance
