@@ -71,7 +71,7 @@ The inline policy is the following (Json format):
 }
 ```
 
-For the cluster autoscaler polycy you can find more details [here](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
+For the cluster autoscaler policy you can find more details [here](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
 The full documentation for the cluster autoscaler is available [here](https://github.com/kubernetes/autoscaler)
 
 ## Notes about K3s
@@ -83,8 +83,8 @@ In this tutorial the High Availability of the K3s cluster is provided using the 
 The final infrastructure will be made by:
 
 * two autoscaling groups:
- * one autoscaling group for the server nodes named "k3s_servers"
- * one autoscaling group for the worker nodes named "k3s_workers"
+  * one autoscaling group for the server nodes named "k3s_servers"
+  * one autoscaling group for the worker nodes named "k3s_workers"
 * one internal load balancer that will route traffic to K3s servers
 * one target group that will check the health of our K3s server on port 6433
 
@@ -93,9 +93,9 @@ The other resources created by terraform are:
 * two launch templates (one for the servers and one for the workers) used by the autoscaling groups
 * an ssh key pair associated with each EC2 instance
 * a securiy group that will allow:
- * incoming traffic only from your public ip address on port 22 (ssh)
- * incoming traffic inside the vpc subnet on port 6443 (kube-api server)
- * outgoing traffic to the internet
+  * incoming traffic only from your public ip address on port 22 (ssh)
+  * incoming traffic inside the vpc subnet on port 6443 (kube-api server)
+  * outgoing traffic to the internet
 
 Notes about the auoscaling group:
 
