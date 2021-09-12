@@ -236,7 +236,7 @@ kubectl apply -f cluster-autoscaler-autodiscover.yaml
 
 ## Clean up
 
-**Remember** to clean all the previously usly created resources when you have finished! We don't want surprises from AWS billing team:
+**Remember** to clean all the previously created resources when you have finished! We don't want surprises from AWS billing team:
 
 ```
 terraform destroy
