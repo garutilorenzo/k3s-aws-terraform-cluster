@@ -7,7 +7,7 @@ variable "AWS_SECRET_KEY" {
 }
 
 variable "AWS_REGION" {
-  default = "<change_me>"
+  default     = "<change_me>"
   description = "AWS Zone"
 }
 
