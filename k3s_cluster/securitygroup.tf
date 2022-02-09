@@ -18,8 +18,8 @@ resource "aws_security_group" "allow-strict" {
   }
 
   ingress {
-    from_port   = 6443
-    to_port     = 6443
+    from_port   = var.kube_api_port
+    to_port     = var.kube_api_port
     protocol    = "tcp"
     cidr_blocks = [var.vpc_subnet_cidr]
   }

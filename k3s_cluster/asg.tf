@@ -21,31 +21,20 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
         version            = "$Latest"
       }
 
-      override {
-        instance_type     = "t3.large"
-        weighted_capacity = "1"
+      dynamic "override" {
+        for_each = var.instance_types
+        content {
+          instance_type     = override.value
+          weighted_capacity = "1"
+        }
       }
 
-      override {
-        instance_type     = "t2.large"
-        weighted_capacity = "1"
-      }
-
-      override {
-        instance_type     = "m4.large"
-        weighted_capacity = "1"
-      }
-
-      override {
-        instance_type     = "t3a.large"
-        weighted_capacity = "1"
-      }
     }
   }
 
-  desired_capacity          = 3
-  min_size                  = 3
-  max_size                  = 4
+  desired_capacity          = var.k3s_server_desired_capacity
+  min_size                  = var.k3s_server_min_capacity
+  max_size                  = var.k3s_server_max_capacity
   health_check_grace_period = 300
   health_check_type         = "EC2"
   force_delete              = true
@@ -86,31 +75,20 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
         version            = "$Latest"
       }
 
-      override {
-        instance_type     = "t3.large"
-        weighted_capacity = "1"
+      dynamic "override" {
+        for_each = var.instance_types
+        content {
+          instance_type     = override.value
+          weighted_capacity = "1"
+        }
       }
 
-      override {
-        instance_type     = "t2.large"
-        weighted_capacity = "1"
-      }
-
-      override {
-        instance_type     = "m4.large"
-        weighted_capacity = "1"
-      }
-
-      override {
-        instance_type     = "t3a.large"
-        weighted_capacity = "1"
-      }
     }
   }
 
-  desired_capacity          = 3
-  min_size                  = 3
-  max_size                  = 4
+  desired_capacity          = var.k3s_worker_desired_capacity
+  min_size                  = var.k3s_worker_min_capacity
+  max_size                  = var.k3s_worker_max_capacity
   health_check_grace_period = 300
   health_check_type         = "EC2"
   force_delete              = true

@@ -1,7 +1,7 @@
 resource "aws_launch_template" "k3s_server" {
   name_prefix   = "k3s_server_tpl"
   image_id      = var.AMIS[var.AWS_REGION]
-  instance_type = "t3.large"
+  instance_type = var.default_instance_type
   user_data     = data.template_cloudinit_config.k3s_server.rendered
 
   iam_instance_profile {
@@ -28,7 +28,7 @@ resource "aws_launch_template" "k3s_server" {
 resource "aws_launch_template" "k3s_agent" {
   name_prefix   = "k3s_agent_tpl"
   image_id      = var.AMIS[var.AWS_REGION]
-  instance_type = "t3.large"
+  instance_type = var.default_instance_type
   user_data     = data.template_cloudinit_config.k3s_agent.rendered
 
   iam_instance_profile {
