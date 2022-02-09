@@ -28,20 +28,32 @@ AWS_ACCESS_KEY = "xxxxxxxxxxxxxxxxx"
 AWS_SECRET_KEY = "xxxxxxxxxxxxxxxxx"
 ```
 
-on the vars.tf file change the following vars:
+edit the main.tf files and set the following variables:
 
-* AWS_REGION, set the correct aws region based on your needs
-* PATH_TO_PUBLIC_KEY and PATH_TO_PRIVATE_KEY, this variables have tou point at your ssh public key and your ssh private key
-* vpc_id, set your vpc-id. You can find your vpc_id in your AWS console (Example: vpc-xxxxx)
-* vpc_subnets, set the list of your VPC subnets. You can find the list of your vpc subnets in your AWS console (Example: subnet-xxxxxx)
-* vpc_subnet_cidr, set your vcp subnet cidr. You can find the VPC subnet CIDR in your AWS console (Example: 172.31.0.0/16)
-* my_public_ip_cidr, your public ip in cidr format (Example: 195.102.xxx.xxx/32)
+| Var   | Required | Desc |
+| ------- | ------- | ----------- |
+| `AWS_REGION`       | `yes`       | set the correct aws region based on your needs  |
+| `vpc_id` | `yes`        | set your vpc-id. You can find your vpc_id in your AWS console (Example: vpc-xxxxx) |
+| `vpc_subnets` | `yes`        | set the list of your VPC subnets. You can find the list of your vpc subnets in your AWS console (Example: subnet-xxxxxx) |
+| `vpc_subnet_cidr` | `yes`        | set your vcp subnet cidr. You can find the VPC subnet CIDR in your AWS console (Example: 172.31.0.0/16) |
+| `cluster_name` | `yes`        | the name of your K3s cluster. Default: k3s-cluster |
+| `k3s_token` | `yes`        | The token of your K3s cluster. **Tip:**  generate a random token with: *cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 55 | head -n 1* |
+| `instance_profile_name` |  `yes` | Instance profile name. Pre-populated on maint.tf. Default: AWSEC2ReadOnlyAccess. More details [here](#instance-profile)|
+| `my_public_ip_cidr` | `yes`        |  your public ip in cidr format (Example: 195.102.xxx.xxx/32) |
+| `PATH_TO_PUBLIC_KEY`     | `no`       | Path to your public ssh key (Default: "~/.ssh/id_rsa.pub) |
+| `PATH_TO_PRIVATE_KEY` | `no`        | Path to your private ssh key (Default: "~/.ssh/id_rsa) |
+| `default_instance_type` | `no`        | Default instance type used by the Launch template. Default: t3.large |
+| `instance_types` | `no`        | Array of instances used by the ASG. Dfault: { asg_instance_type_1 = "t3.large", asg_instance_type_3 = "m4.large", asg_instance_type_4 = "t3a.large" } |
+| `kube_api_port` | `no`        | Kube api default port Default: 6443|
+| `k3s_server_desired_capacity` | `no`        | Desired number of k3s servers. Default 3 |
+| `k3s_server_min_capacity` | `no`        | Min number of k3s servers: Default 4 |
+| `k3s_server_max_capacity` | `no`        |  Max number of k3s servers: Default 3 |
+| `k3s_worker_desired_capacity` | `no`        | Desired number of k3s workers. Default 3 |
+| `k3s_worker_min_capacity` | `no`        | Min number of k3s workers: Default 4 |
+| `k3s_worker_max_capacity` | `no`        | Max number of k3s workers: Default 3 |
 
-you can also change this optionals variables:
 
-* k3s_token, the token of your K3s cluster
-* cluster_name, the name of your K3s cluster
-* AMIS, set the id of the amis that you will use (Note this tutorial was tested using Ubuntu 20.04)
+### Instance profile
 
 You have to create manually an AWS IAM role named "AWSEC2ReadOnlyAccess".
 You can use a custom name for this role, the name then have to be set in vars.tf in instance_profile_name variable.
@@ -121,7 +133,6 @@ The types of instances used on this tutorial are:
 The other EC2 instance types are defined/overrided in asg.tf, and are:
 
 * t3.large, like the default one
-* t2.large
 * m4.large
 * t3a.large
 
