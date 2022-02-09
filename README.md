@@ -37,7 +37,7 @@ edit the main.tf files and set the following variables:
 | `vpc_subnets` | `yes`        | set the list of your VPC subnets. You can find the list of your vpc subnets in your AWS console (Example: subnet-xxxxxx) |
 | `vpc_subnet_cidr` | `yes`        | set your vcp subnet cidr. You can find the VPC subnet CIDR in your AWS console (Example: 172.31.0.0/16) |
 | `cluster_name` | `yes`        | the name of your K3s cluster. Default: k3s-cluster |
-| `k3s_token` | `yes`        | The token of your K3s cluster. **Tip:**  generate a random token with: *cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 55 | head -n 1* |
+| `k3s_token` | `yes`        | The token of your K3s cluster. [How to](#generate-random-token) generate a random token |
 | `instance_profile_name` |  `yes` | Instance profile name. Pre-populated on maint.tf. Default: AWSEC2ReadOnlyAccess. More details [here](#instance-profile)|
 | `my_public_ip_cidr` | `yes`        |  your public ip in cidr format (Example: 195.102.xxx.xxx/32) |
 | `PATH_TO_PUBLIC_KEY`     | `no`       | Path to your public ssh key (Default: "~/.ssh/id_rsa.pub) |
@@ -90,6 +90,14 @@ The inline policy is the following (Json format):
 
 For the cluster autoscaler policy you can find more details [here](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
 The full documentation for the cluster autoscaler is available [here](https://github.com/kubernetes/autoscaler)
+
+### Generate random token
+
+Generate random k3s tocken with:
+
+```
+cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 55 | head -n 1
+```
 
 ## Notes about K3s
 
