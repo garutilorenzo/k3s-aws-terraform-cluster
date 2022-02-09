@@ -5,6 +5,8 @@
 *.tfstate
 *.tfstate.*
 
+main.tf_ori
+
 # Crash log files
 crash.log
 
