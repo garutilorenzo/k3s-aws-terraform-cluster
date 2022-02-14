@@ -16,6 +16,15 @@ first_instance=$(aws ec2 describe-instances --filters Name=tag-value,Values=k3s-
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 first_last="last"
 
+CUR_HOSTNAME=$(cat /etc/hostname)
+NEW_HOSTNAME=$instance_id
+
+hostnamectl set-hostname $NEW_HOSTNAME
+hostname $NEW_HOSTNAME
+
+sudo sed -i "s/$CUR_HOSTNAME/$NEW_HOSTNAME/g" /etc/hosts
+sudo sed -i "s/$CUR_HOSTNAME/$NEW_HOSTNAME/g" /etc/hostname
+
 if [[ "$first_instance" == "$instance_id" ]]; then
     echo "I'm the first yeeee: Cluster init!"
     first_last="first"
