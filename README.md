@@ -38,8 +38,13 @@ edit the main.tf files and set the following variables:
 | `vpc_subnet_cidr` | `yes`        | set your vcp subnet cidr. You can find the VPC subnet CIDR in your AWS console (Example: 172.31.0.0/16) |
 | `cluster_name` | `yes`        | the name of your K3s cluster. Default: k3s-cluster |
 | `k3s_token` | `yes`        | The token of your K3s cluster. [How to](#generate-random-token) generate a random token |
-| `instance_profile_name` |  `yes` | Instance profile name. Pre-populated on maint.tf. Default: AWSEC2ReadOnlyAccess. More details [here](#instance-profile)|
 | `my_public_ip_cidr` | `yes`        |  your public ip in cidr format (Example: 195.102.xxx.xxx/32) |
+| `environment`  | `yes`  | Current work environment (Example: staging/dev/prod). This value is used for tag all the deployed resources |
+| `default_instance_profile_name`  | `no`  | Instance profile name. Default: AWSEC2K3SInstanceProfile |
+| `default_iam_role`  | `no`  | IAM role name. Default: AWSEC2K3SRole |
+| `create_extlb`  | `no`  | Boolean value true/false, specify true for deploy an external LB pointing to k3s worker nodes. Default: false |
+| `extlb_http_port`  | `no`  | http port used by the external LB. Default: 80 |
+| `extlb_https_port`  | `no`  | https port used by the external LB. Default: 443  |
 | `PATH_TO_PUBLIC_KEY`     | `no`       | Path to your public ssh key (Default: "~/.ssh/id_rsa.pub) |
 | `PATH_TO_PRIVATE_KEY` | `no`        | Path to your private ssh key (Default: "~/.ssh/id_rsa) |
 | `default_instance_type` | `no`        | Default instance type used by the Launch template. Default: t3.large |
@@ -55,10 +60,7 @@ edit the main.tf files and set the following variables:
 
 ### Instance profile
 
-You have to create manually an AWS IAM role named "AWSEC2ReadOnlyAccess".
-You can use a custom name for this role, the name then have to be set in vars.tf in instance_profile_name variable.
-
-The role is made by:
+This module will deploy a custom instance profile with the following permissions:
 
 * AmazonEC2ReadOnlyAccess - is an AWS managed policy
 * a custom inline policy for the cluster autoscaler (optional)
@@ -90,6 +92,8 @@ The inline policy is the following (Json format):
 
 For the cluster autoscaler policy you can find more details [here](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
 The full documentation for the cluster autoscaler is available [here](https://github.com/kubernetes/autoscaler)
+
+The instance profile name is customizable with the variable: *default_instance_profile_name*. The default name for this instance profile is: AWSEC2K3SInstanceProfile.
 
 ### Generate random token
 
@@ -169,15 +173,28 @@ if everything is ok the output should be something like:
       + owner_id               = (known after apply)
       + revoke_rules_on_delete = false
       + tags                   = {
-          + "Name" = "allow-strict"
+          + "Name"        = "allow-strict"
+          + "environment" = "staging"
+          + "provisioner" = "terraform"
         }
       + tags_all               = {
-          + "Name" = "allow-strict"
+          + "Name"        = "allow-strict"
+          + "environment" = "staging"
+          + "provisioner" = "terraform"
         }
       + vpc_id                 = "vpc-xxxx"
     }
 
-Plan: 10 to add, 0 to change, 0 to destroy.
+Plan: 15 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + k3s_elb_public_dns     = []
+  + k3s_servers_public_ips = [
+      + (known after apply),
+    ]
+  + k3s_workers_public_ips = [
+      + (known after apply),
+    ]
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -196,13 +213,25 @@ After about five minutes our Kubernetes cluster will be ready. You can now ssh i
 If you have the aws cli installed you can find the ips of the master nodes with:
 
 ```
-aws ec2 describe-instances --filters Name=tag-value,Values=k3s-server Name=instance-state-name,Values=running --query "Reservations[*].Instances[*].[PublicIpAddress, Tags[?Key=='Name'].Value|[0]]" 
+aws ec2 describe-instances --filters Name=tag-value,Values=k3s-server Name=instance-state-name,Values=running --query "Reservations[*].Instances[*].[PublicIpAddress, Tags[?Key=='k3s-instance-type'].Value|[0]]" 
 ```
 
 On one master node the you can check the status of the cluster with:
 
 ```
-kubectl get nodes
+ssh X.X.X.X -lubuntu
+
+ubuntu@i-09a42419e18e4dd0a:~$ sudo su -
+root@i-09a42419e18e4dd0a:~# kubectl get nodes
+
+NAME                  STATUS   ROLES                       AGE   VERSION
+i-015f4e5b0c790ec07   Ready    <none>                      53s   v1.22.6+k3s1
+i-0447b6b00c6f6422e   Ready    <none>                      42s   v1.22.6+k3s1
+i-06a8449d1ea425e42   Ready    control-plane,etcd,master   96s   v1.22.6+k3s1
+i-09a42419e18e4dd0a   Ready    control-plane,etcd,master   55s   v1.22.6+k3s1
+i-0a01b7c89c958bc4b   Ready    control-plane,etcd,master   38s   v1.22.6+k3s1
+i-0c4c81a33568df947   Ready    <none>                      47s   v1.22.6+k3s1
+root@i-09a42419e18e4dd0a:~#
 ```
 
 and see all the nodes provisioned.
