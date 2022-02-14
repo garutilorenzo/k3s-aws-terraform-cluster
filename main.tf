@@ -14,7 +14,7 @@ variable "AWS_REGION" {
 
 module "k3s_cluster" {
   AWS_REGION          = "<change_me>"
-  instance_profile_name = "AmazonEC2ReadOnlyAccess"
+  environment         = "staging"
   my_public_ip_cidr   = "<change_me>"
   vpc_id              = "<change_me>"
   vpc_subnets         = ["<change_me>", "<change_me>", "<change_me>"]
