@@ -40,7 +40,19 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
   force_delete              = true
 
   tag {
-    key                 = "Name"
+    key                 = "provisioner"
+    value               = "terraform"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "environment"
+    value               = var.environment
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k3s-instance-type"
     value               = "k3s-server"
     propagate_at_launch = true
   }
@@ -94,7 +106,19 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
   force_delete              = true
 
   tag {
-    key                 = "Name"
+    key                 = "provisioner"
+    value               = "terraform"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "environment"
+    value               = var.environment
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k3s-instance-type"
     value               = "k3s-worker"
     propagate_at_launch = true
   }

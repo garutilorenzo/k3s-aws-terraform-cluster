@@ -2,6 +2,10 @@ variable "AWS_REGION" {
   type = string
 }
 
+variable "environment" {
+  type = string
+}
+
 variable "AMIS" {
   type = map(string)
   default = {
@@ -26,11 +30,6 @@ variable "PATH_TO_PRIVATE_KEY" {
 variable "vpc_id" {
   type        = string
   description = "The vpc id"
-}
-
-variable "instance_profile_name" {
-  type        = string
-  description = "The name of the instance profile to use"
 }
 
 variable "my_public_ip_cidr" {
@@ -59,15 +58,46 @@ variable "instance_types" {
   type        = map(string)
   default = {
     asg_instance_type_1 = "t3.large"
+    asg_instance_type_2 = "t2.large"
     asg_instance_type_3 = "m4.large"
     asg_instance_type_4 = "t3a.large"
   }
+}
+
+variable "default_instance_profile_name" {
+  type        = string
+  default     = "AWSEC2K3SInstanceProfile"
+  description = "Default instance profile name"
+}
+
+variable "default_iam_role" {
+  type        = string
+  default     = "AWSEC2K3SRole"
+  description = "Default IAM role name"
 }
 
 variable "kube_api_port" {
   type        = number
   default     = 6443
   description = "Kubeapi Port"
+}
+
+variable "create_extlb" {
+  type        = bool
+  default     = false
+  description = "Create external LB true/false"
+}
+
+variable "extlb_http_port" {
+  type        = number
+  default     = 80
+  description = "External LB HTTP port"
+}
+
+variable "extlb_https_port" {
+  type        = number
+  default     = 443
+  description = "External LB HTTPS port"
 }
 
 variable "k3s_server_desired_capacity" {

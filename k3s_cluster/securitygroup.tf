@@ -33,6 +33,28 @@ resource "aws_security_group" "allow-strict" {
   }
 
   tags = {
-    Name = "allow-strict"
+    Name        = "allow-strict"
+    environment = "${var.environment}"
+    provisioner = "terraform"
   }
+}
+
+resource "aws_security_group_rule" "allow_lb_http_traffic" {
+  count             = var.create_extlb ? 1 : 0
+  type              = "ingress"
+  from_port         = var.extlb_http_port
+  to_port           = var.extlb_http_port
+  protocol          = "tcp"
+  cidr_blocks       = [var.my_public_ip_cidr]
+  security_group_id = aws_security_group.allow-strict.id
+}
+
+resource "aws_security_group_rule" "allow_lb_https_traffic" {
+  count             = var.create_extlb ? 1 : 0
+  type              = "ingress"
+  from_port         = var.extlb_https_port
+  to_port           = var.extlb_https_port
+  protocol          = "tcp"
+  cidr_blocks       = [var.my_public_ip_cidr]
+  security_group_id = aws_security_group.allow-strict.id
 }

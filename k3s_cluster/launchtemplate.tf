@@ -5,7 +5,7 @@ resource "aws_launch_template" "k3s_server" {
   user_data     = data.template_cloudinit_config.k3s_server.rendered
 
   iam_instance_profile {
-    name = var.instance_profile_name
+    name = aws_iam_instance_profile.ec2_instance_profile.name
   }
 
   block_device_mappings {
@@ -23,6 +23,12 @@ resource "aws_launch_template" "k3s_server" {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.allow-strict.id]
   }
+
+  tags = {
+    environment = "${var.environment}"
+    provisioner = "terraform"
+  }
+
 }
 
 resource "aws_launch_template" "k3s_agent" {
@@ -32,7 +38,7 @@ resource "aws_launch_template" "k3s_agent" {
   user_data     = data.template_cloudinit_config.k3s_agent.rendered
 
   iam_instance_profile {
-    name = var.instance_profile_name
+    name = aws_iam_instance_profile.ec2_instance_profile.name
   }
 
   block_device_mappings {
@@ -49,5 +55,10 @@ resource "aws_launch_template" "k3s_agent" {
   network_interfaces {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.allow-strict.id]
+  }
+
+  tags = {
+    environment = "${var.environment}"
+    provisioner = "terraform"
   }
 }
