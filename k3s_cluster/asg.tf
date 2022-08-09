@@ -11,7 +11,7 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
   mixed_instances_policy {
     instances_distribution {
       on_demand_base_capacity                  = 0
-      on_demand_percentage_above_base_capacity = 20
+      on_demand_percentage_above_base_capacity = var.install_longhorn ? 100 : 20
       spot_allocation_strategy                 = "capacity-optimized"
     }
 

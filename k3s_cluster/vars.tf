@@ -166,3 +166,13 @@ variable "k3s_token" {
   type        = string
   description = "Override to set k3s cluster registration token"
 }
+
+variable "install_longhorn" {
+  type    = bool
+  default = true
+}
+
+variable "longhorn_release" {
+  type    = string
+  default = "v1.2.3"
+}

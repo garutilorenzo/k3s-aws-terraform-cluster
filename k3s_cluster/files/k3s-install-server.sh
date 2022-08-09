@@ -47,6 +47,23 @@ if [[ "$first_last" == "first" ]]; then
   kubectl apply -f https://github.com/aws/aws-node-termination-handler/releases/download/v1.13.3/all-resources.yaml
 fi
 
+%{ if install_longhorn }
+if [[ "$first_last" == "first" ]]; then
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y  open-iscsi curl util-linux
+    systemctl enable iscsid.service
+    systemctl start iscsid.service
+    for instance in $(aws ec2 describe-instances --filters Name=tag-value,Values=k3s-server Name=instance-state-name,Values=running --query 'Reservations[*].Instances[?InstanceLifecycle!=`spot`][InstanceId]' --output text)
+    do
+      echo $instance
+      kubectl label nodes $instance node.longhorn.io/create-default-disk=true
+    done
+    curl -o /root/longhorn.yaml https://raw.githubusercontent.com/longhorn/longhorn/${longhorn_release}/deploy/longhorn.yaml
+    sed -i 's/create-default-disk-labeled-nodes:/create-default-disk-labeled-nodes: true/' /root/longhorn.yaml
+    kubectl apply -f /root/longhorn.yaml
+    kubectl create -f https://raw.githubusercontent.com/longhorn/longhorn/${longhorn_release}/examples/storageclass.yaml
+fi
+%{ endif }
+
 %{ if install_nginx_ingress }
 if [[ "$first_last" == "first" ]]; then
     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/baremetal/deploy.yaml

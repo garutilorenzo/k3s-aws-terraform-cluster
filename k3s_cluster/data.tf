@@ -50,6 +50,8 @@ data "template_cloudinit_config" "k3s_server" {
       is_k3s_server             = true,
       install_nginx_ingress     = var.install_nginx_ingress,
       install_certmanager       = var.install_certmanager,
+      install_longhorn          = var.install_longhorn,
+      longhorn_release          = var.longhorn_release,
       certmanager_release       = var.certmanager_release,
       certmanager_email_address = var.certmanager_email_address,
       k3s_url                   = aws_lb.k3s-server-lb.dns_name,
