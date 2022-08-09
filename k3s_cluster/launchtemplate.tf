@@ -24,6 +24,10 @@ resource "aws_launch_template" "k3s_server" {
     security_groups             = [aws_security_group.allow-strict.id]
   }
 
+  private_dns_name_options {
+    hostname_type = "resource-name"
+  }
+
   tags = {
     environment = "${var.environment}"
     provisioner = "terraform"
@@ -55,6 +59,10 @@ resource "aws_launch_template" "k3s_agent" {
   network_interfaces {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.allow-strict.id]
+  }
+
+  private_dns_name_options {
+    hostname_type = "resource-name"
   }
 
   tags = {
