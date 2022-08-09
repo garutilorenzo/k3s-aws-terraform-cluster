@@ -40,6 +40,12 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
   force_delete              = true
 
   tag {
+    key                 = "Name"
+    value               = "${var.cluster_name}-k3s-server-${var.environment}"
+    propagate_at_launch = true
+  }
+
+  tag {
     key                 = "provisioner"
     value               = "terraform"
     propagate_at_launch = true
@@ -104,6 +110,12 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
   health_check_grace_period = 300
   health_check_type         = "EC2"
   force_delete              = true
+
+  tag {
+    key                 = "Name"
+    value               = "${var.cluster_name}-k3s-worker-${var.environment}"
+    propagate_at_launch = true
+  }
 
   tag {
     key                 = "provisioner"
