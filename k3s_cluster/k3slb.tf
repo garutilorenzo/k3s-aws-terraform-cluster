@@ -58,5 +58,5 @@ resource "aws_autoscaling_attachment" "target" {
   ]
 
   autoscaling_group_name = aws_autoscaling_group.k3s_servers_asg.name
-  alb_target_group_arn   = aws_lb_target_group.k3s-server-tg.arn
+  lb_target_group_arn    = aws_lb_target_group.k3s-server-tg.arn
 }
