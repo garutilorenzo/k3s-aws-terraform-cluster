@@ -7,6 +7,19 @@
 
 Deploy in a few minutes an high available K3s cluster on Amazon AWS using mixed on-demand and spot instances
 
+# Table of Contents
+
+* [Requirements](#requirements)
+* [Before you start](#before-you-start)
+* [Pre flight checklist](#pre-flight-checklist)
+* [Notes about K3s](#notes-about-k3s)
+* [Infrastructure overview](#infrastructure-overview)
+* [Instances used](#instances-used)
+* [Deploy](#deploy)
+* [Cluster resource deployed](#cluster-resource-deployed)
+* [Optional cluster resources](#optional-cluster-resources)
+* [Clean up](#clean-up)
+
 ## Requirements
 
 * [Terraform](https://www.terraform.io/) - Terraform is an open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services. Terraform codifies cloud APIs into declarative configuration files.
@@ -195,6 +208,10 @@ metadata:
 ```
 
 and enable the proxy protocol on the load balancer target group, *proxy_protocol_v2* set to true.
+
+### Cert-manager
+
+[cert-manager](https://cert-manager.io/docs/) is used to issue certificates from a variety of supported source. To use cert-manager take a look at [nginx-ingress-cert-manager.yml](deployments/nginx/nginx-ingress-cert-manager.yml) and [nginx-configmap-cert-manager.yml](deployments/nginx/nginx-configmap-cert-manager.yml) example. To use cert-manager and get the certificate you **need** set on your DNS configuration the public ip address of the load balancer.
 
 ## Instances used
 
