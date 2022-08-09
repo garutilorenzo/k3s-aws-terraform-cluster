@@ -3,7 +3,7 @@ data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
 }
 
 data "aws_instances" "k3s_servers" {
-  
+
   depends_on = [
     aws_autoscaling_group.k3s_servers_asg,
   ]
@@ -18,7 +18,7 @@ data "aws_instances" "k3s_servers" {
 }
 
 data "aws_instances" "k3s_workers" {
-  
+
   depends_on = [
     aws_autoscaling_group.k3s_workers_asg,
   ]
