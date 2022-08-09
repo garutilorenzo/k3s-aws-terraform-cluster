@@ -16,16 +16,20 @@ first_instance=$(aws ec2 describe-instances --filters Name=tag-value,Values=k3s-
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 first_last="last"
 
+%{ if install_nginx_ingress } 
+disable_traefik="--disable traefik"
+%{ endif }
+
 if [[ "$first_instance" == "$instance_id" ]]; then
     echo "I'm the first yeeee: Cluster init!"
     first_last="first"
-    until (curl -sfL https://get.k3s.io | K3S_TOKEN=${k3s_token} sh -s - --cluster-init --node-ip $local_ip --advertise-address $local_ip --flannel-iface $flannel_iface --tls-san ${k3s_tls_san} --kubelet-arg="provider-id=aws:///$provider_id"); do
+    until (curl -sfL https://get.k3s.io | K3S_TOKEN=${k3s_token} sh -s - --cluster-init $disable_traefik --node-ip $local_ip --advertise-address $local_ip --flannel-iface $flannel_iface --tls-san ${k3s_tls_san} --kubelet-arg="provider-id=aws:///$provider_id"); do
       echo 'k3s did not install correctly'
       sleep 2
     done
 else
     echo "I'm like England :( Cluster join"
-    until (curl -sfL https://get.k3s.io | K3S_TOKEN=${k3s_token} sh -s - --server https://${k3s_url}:6443 --node-ip $local_ip --advertise-address $local_ip --flannel-iface $flannel_iface --tls-san ${k3s_tls_san} --kubelet-arg="provider-id=aws:///$provider_id"  ); do
+    until (curl -sfL https://get.k3s.io | K3S_TOKEN=${k3s_token} sh -s - --server https://${k3s_url}:6443 $disable_traefik --node-ip $local_ip --advertise-address $local_ip --flannel-iface $flannel_iface --tls-san ${k3s_tls_san} --kubelet-arg="provider-id=aws:///$provider_id"  ); do
       echo 'k3s did not install correctly'
       sleep 2
     done
@@ -42,6 +46,109 @@ if [[ "$first_last" == "first" ]]; then
   echo 'Install node termination handler'
   kubectl apply -f https://github.com/aws/aws-node-termination-handler/releases/download/v1.13.3/all-resources.yaml
 fi
+
+%{ if install_nginx_ingress }
+if [[ "$first_last" == "first" ]]; then
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/baremetal/deploy.yaml
+cat << 'EOF' > /root/nginx-ingress-resources.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller-loadbalancer
+  namespace: ingress-nginx
+spec:
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  type: LoadBalancer
+---
+apiVersion: v1
+data:
+  allow-snippet-annotations: "true"
+  enable-real-ip: "true"
+  proxy-real-ip-cidr: "0.0.0.0/0"
+  proxy-body-size: "20m"
+  use-proxy-protocol: "true"
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.1.1
+    helm.sh/chart: ingress-nginx-4.0.16
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+EOF
+    kubectl apply -f /root/nginx-ingress-resources.yaml
+fi
+%{ endif }
+
+%{ if install_certmanager }
+if [[ "$first_last" == "first" ]]; then
+    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${certmanager_release}/cert-manager.yaml
+
+cat << 'EOF' > /root/staging_issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+ name: letsencrypt-staging
+ namespace: cert-manager
+spec:
+ acme:
+   # The ACME server URL
+   server: https://acme-staging-v02.api.letsencrypt.org/directory
+   # Email address used for ACME registration
+   email: ${certmanager_email_address}
+   # Name of a secret used to store the ACME account private key
+   privateKeySecretRef:
+     name: letsencrypt-staging
+   # Enable the HTTP-01 challenge provider
+   solvers:
+   - http01:
+       ingress:
+         class:  nginx
+EOF
+
+cat << 'EOF' > /root/prod_issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: ${certmanager_email_address}
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    # Enable the HTTP-01 challenge provider
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+EOF
+    kubectl create -f prod_issuer.yaml
+    kubectl create -f staging_issuer.yaml
+fi
+%{ endif }
+
 %{ endif }
 
 #kubectl get pods -n kube-system | grep aws-node | wc -l

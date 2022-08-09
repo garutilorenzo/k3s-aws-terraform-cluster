@@ -43,6 +43,10 @@ edit the main.tf files and set the following variables:
 | `default_instance_profile_name`  | `no`  | Instance profile name. Default: AWSEC2K3SInstanceProfile |
 | `default_iam_role`  | `no`  | IAM role name. Default: AWSEC2K3SRole |
 | `create_extlb`  | `no`  | Boolean value true/false, specify true for deploy an external LB pointing to k3s worker nodes. Default: false |
+| `install_nginx_ingress`  | `no`  | Boolean value, install kubernetes nginx ingress controller instead of Traefik. Default: true. For more information see [Nginx ingress controller](#nginx-ingress-controller) |
+| `install_certmanager`  | `no`  | Boolean value, install [cert manager](https://cert-manager.io/) "Cloud native certificate management". Default: true  |
+| `certmanager_release`  | `no`  | Cert manager release. Default: v1.8.2  |
+| `certmanager_email_address`  | `no`  | Email address used for signing https certificates. Defaul: changeme@example.com  |
 | `extlb_http_port`  | `no`  | http port used by the external LB. Default: 80 |
 | `extlb_https_port`  | `no`  | https port used by the external LB. Default: 443  |
 | `PATH_TO_PUBLIC_KEY`     | `no`       | Path to your public ssh key (Default: "~/.ssh/id_rsa.pub) |
@@ -135,6 +139,62 @@ Notes about the auoscaling group:
 
 You can change this setting by editing the value of on_demand_percentage_above_base_capacity in asg.tf. You can require that all the EC2 will be launced using on-demand instances setting on_demand_percentage_above_base_capacity to 100. More details [here](https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstancesDistribution.html)
 
+### Nginx ingress controller
+
+In this environment [Nginx ingress controller](https://kubernetes.github.io/ingress-nginx/) is used instead of the standard [Traefik](https://traefik.io/) ingress controller.
+
+The installation is the [bare metal](https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters) installation, the ingress controller then is exposed via K3s LoadBalancer Service.
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller-loadbalancer
+  namespace: ingress-nginx
+spec:
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  type: LoadBalancer
+```
+
+To get the real ip address of the clients using a public L4 load balancer we need to use the proxy protocol feature of nginx ingress controller:
+
+```yaml
+---
+apiVersion: v1
+data:
+  allow-snippet-annotations: "true"
+  enable-real-ip: "true"
+  proxy-real-ip-cidr: "0.0.0.0/0"
+  proxy-body-size: "20m"
+  use-proxy-protocol: "true"
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.1.1
+    helm.sh/chart: ingress-nginx-4.0.16
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+```
+
+and enable the proxy protocol on the load balancer target group, *proxy_protocol_v2* set to true.
 
 ## Instances used
 

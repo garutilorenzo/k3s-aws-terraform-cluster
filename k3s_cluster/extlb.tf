@@ -34,11 +34,11 @@ resource "aws_lb_listener" "external-lb-listener-http" {
 }
 
 resource "aws_lb_target_group" "external-lb-tg-http" {
-  count    = var.create_extlb ? 1 : 0
-  port     = var.extlb_http_port
-  protocol = "TCP"
-  vpc_id   = var.vpc_id
-
+  count             = var.create_extlb ? 1 : 0
+  port              = var.extlb_http_port
+  protocol          = "TCP"
+  vpc_id            = var.vpc_id
+  proxy_protocol_v2 = true
 
   depends_on = [
     aws_lb.external-lb
@@ -90,11 +90,11 @@ resource "aws_lb_listener" "external-lb-listener-https" {
 }
 
 resource "aws_lb_target_group" "external-lb-tg-https" {
-  count    = var.create_extlb ? 1 : 0
-  port     = var.extlb_https_port
-  protocol = "TCP"
-  vpc_id   = var.vpc_id
-
+  count             = var.create_extlb ? 1 : 0
+  port              = var.extlb_https_port
+  protocol          = "TCP"
+  vpc_id            = var.vpc_id
+  proxy_protocol_v2 = true
 
   depends_on = [
     aws_lb.external-lb

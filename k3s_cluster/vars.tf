@@ -37,6 +37,26 @@ variable "my_public_ip_cidr" {
   description = "My public ip CIDR"
 }
 
+variable "install_nginx_ingress" {
+  type    = bool
+  default = true
+}
+
+variable "install_certmanager" {
+  type    = bool
+  default = true
+}
+
+variable "certmanager_release" {
+  type    = string
+  default = "v1.8.2"
+}
+
+variable "certmanager_email_address" {
+  type    = string
+  default = "changeme@example.com"
+}
+
 variable "vpc_subnet_cidr" {
   type        = string
   description = "VPC subnet CIDR"
