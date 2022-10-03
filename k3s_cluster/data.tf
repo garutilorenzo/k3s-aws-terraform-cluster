@@ -1,3 +1,8 @@
+resource "random_password" "k3s_token" {
+  length  = 55
+  special = false
+}
+
 data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
   arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
 }
@@ -46,14 +51,19 @@ data "template_cloudinit_config" "k3s_server" {
   part {
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/files/k3s-install-server.sh", {
-      k3s_token                 = var.k3s_token,
-      is_k3s_server             = true,
-      install_nginx_ingress     = var.install_nginx_ingress,
-      install_certmanager       = var.install_certmanager,
-      certmanager_release       = var.certmanager_release,
-      certmanager_email_address = var.certmanager_email_address,
-      k3s_url                   = aws_lb.k3s-server-lb.dns_name,
-      k3s_tls_san               = aws_lb.k3s-server-lb.dns_name
+      k3s_version                      = var.k3s_version,
+      k3s_token                        = random_password.k3s_token.result,
+      k3s_subnet                       = var.k3s_subnet,
+      is_k3s_server                    = true,
+      install_node_termination_handler = var.install_node_termination_handler,
+      node_termination_handler_release = var.node_termination_handler_release,
+      install_nginx_ingress            = var.install_nginx_ingress,
+      nginx_ingress_release            = var.nginx_ingress_release,
+      install_certmanager              = var.install_certmanager,
+      certmanager_release              = var.certmanager_release,
+      certmanager_email_address        = var.certmanager_email_address,
+      k3s_url                          = aws_lb.k3s-server-lb.dns_name,
+      k3s_tls_san                      = aws_lb.k3s-server-lb.dns_name
     })
   }
 }
@@ -72,7 +82,9 @@ data "template_cloudinit_config" "k3s_agent" {
   part {
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/files/k3s-install-agent.sh", {
-      k3s_token     = var.k3s_token,
+      k3s_version   = var.k3s_version,
+      k3s_token     = random_password.k3s_token.result,
+      k3s_subnet    = var.k3s_subnet,
       is_k3s_server = false,
       k3s_url       = aws_lb.k3s-server-lb.dns_name,
       k3s_tls_san   = aws_lb.k3s-server-lb.dns_name

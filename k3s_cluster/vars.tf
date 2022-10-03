@@ -6,12 +6,22 @@ variable "environment" {
   type = string
 }
 
+variable "k3s_version" {
+  type    = string
+  default = "latest"
+}
+
+variable "k3s_subnet" {
+  type    = string
+  default = "default_route_table"
+}
+
 variable "AMIS" {
   type = map(string)
   default = {
-    us-east-1 = "ami-0ae74ae9c43584639"
-    us-west-2 = "ami-09f5b7791a4e85729"
-    eu-west-1 = "ami-0141514361b6a3c1b" # ami-081ff4b9aa4e81a08 # ami-0da36f7f059b7086e
+    us-east-1 = "ami-0f01974d5fd3b4530"
+    us-west-2 = "ami-09b93cc9c91e4ee20"
+    eu-west-1 = "ami-099b1e41f3043ce3a"
   }
 }
 
@@ -42,6 +52,21 @@ variable "install_nginx_ingress" {
   default = true
 }
 
+variable "nginx_ingress_release" {
+  type    = string
+  default = "v1.3.1"
+}
+
+variable "install_node_termination_handler" {
+  type    = bool
+  default = true
+}
+
+variable "node_termination_handler_release" {
+  type    = string
+  default = "v1.17.3"
+}
+
 variable "install_certmanager" {
   type    = bool
   default = true
@@ -49,7 +74,7 @@ variable "install_certmanager" {
 
 variable "certmanager_release" {
   type    = string
-  default = "v1.8.2"
+  default = "v1.9.1"
 }
 
 variable "certmanager_email_address" {
@@ -160,9 +185,4 @@ variable "cluster_name" {
   type        = string
   default     = "k3s-cluster"
   description = "Cluster name"
-}
-
-variable "k3s_token" {
-  type        = string
-  description = "Override to set k3s cluster registration token"
 }
