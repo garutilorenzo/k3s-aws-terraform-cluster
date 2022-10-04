@@ -65,10 +65,14 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   }
 }
 
-
 resource "aws_iam_role_policy_attachment" "attach_ec2_ro_policy" {
   role       = aws_iam_role.aws_ec2_custom_role.name
   policy_arn = data.aws_iam_policy.AmazonEC2ReadOnlyAccess.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_ssm_policy" {
+  role       = aws_iam_role.aws_ec2_custom_role.name
+  policy_arn = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
 }
 
 resource "aws_iam_role_policy_attachment" "attach_cluster_autoscaler_policy" {
