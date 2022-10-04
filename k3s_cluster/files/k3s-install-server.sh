@@ -1,56 +1,7 @@
 #!/bin/bash
 
-apt-get update
-apt-get install -y software-properties-common unzip
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-rm -rf aws awscliv2.zip
-
-local_ip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-flannel_iface=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)')
-provider_id="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)/$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
-
-first_instance=$(aws ec2 describe-instances --filters Name=tag-value,Values=k3s-server Name=instance-state-name,Values=running --query 'sort_by(Reservations[].Instances[], &LaunchTime)[:-1].[InstanceId]' --output text | head -n1)
-instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-first_last="last"
-
-%{ if install_nginx_ingress } 
-disable_traefik="--disable traefik"
-%{ endif }
-
-if [[ "$first_instance" == "$instance_id" ]]; then
-    echo "I'm the first yeeee: Cluster init!"
-    first_last="first"
-    until (curl -sfL https://get.k3s.io | K3S_TOKEN=${k3s_token} sh -s - --cluster-init $disable_traefik --node-ip $local_ip --advertise-address $local_ip --flannel-iface $flannel_iface --tls-san ${k3s_tls_san} --kubelet-arg="provider-id=aws:///$provider_id"); do
-      echo 'k3s did not install correctly'
-      sleep 2
-    done
-else
-    echo "I'm like England :( Cluster join"
-    until (curl -sfL https://get.k3s.io | K3S_TOKEN=${k3s_token} sh -s - --server https://${k3s_url}:6443 $disable_traefik --node-ip $local_ip --advertise-address $local_ip --flannel-iface $flannel_iface --tls-san ${k3s_tls_san} --kubelet-arg="provider-id=aws:///$provider_id"  ); do
-      echo 'k3s did not install correctly'
-      sleep 2
-    done
-fi
-
-%{ if is_k3s_server }
-until kubectl get pods -A | grep 'Running'; do
-  echo 'Waiting for k3s startup'
-  sleep 5
-done
-
-#Install node termination handler
-if [[ "$first_last" == "first" ]]; then
-  echo 'Install node termination handler'
-  kubectl apply -f https://github.com/aws/aws-node-termination-handler/releases/download/v1.13.3/all-resources.yaml
-fi
-
-%{ if install_nginx_ingress }
-if [[ "$first_last" == "first" ]]; then
-    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/baremetal/deploy.yaml
-cat << 'EOF' > /root/nginx-ingress-resources.yaml
+render_nginx_config(){
+cat << 'EOF' > "$NGINX_RESOURCES_FILE"
 ---
 apiVersion: v1
 kind: Service
@@ -88,20 +39,16 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
-    app.kubernetes.io/version: 1.1.1
+    app.kubernetes.io/version: ${nginx_ingress_release}
     helm.sh/chart: ingress-nginx-4.0.16
   name: ingress-nginx-controller
   namespace: ingress-nginx
 EOF
-    kubectl apply -f /root/nginx-ingress-resources.yaml
-fi
-%{ endif }
+}
 
-%{ if install_certmanager }
-if [[ "$first_last" == "first" ]]; then
-    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${certmanager_release}/cert-manager.yaml
-
-cat << 'EOF' > /root/staging_issuer.yaml
+render_staging_issuer(){
+STAGING_ISSUER_RESOURCE=$1
+cat << 'EOF' > "$STAGING_ISSUER_RESOURCE"
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -122,8 +69,11 @@ spec:
        ingress:
          class:  nginx
 EOF
+}
 
-cat << 'EOF' > /root/prod_issuer.yaml
+render_prod_issuer(){
+PROD_ISSUER_RESOURCE=$1
+cat << 'EOF' > "$PROD_ISSUER_RESOURCE"
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -144,8 +94,97 @@ spec:
         ingress:
           class: nginx
 EOF
-    kubectl create -f prod_issuer.yaml
-    kubectl create -f staging_issuer.yaml
+}
+
+apt-get update
+apt-get install -y software-properties-common unzip
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf aws awscliv2.zip
+
+k3s_install_params=("--tls-san ${k3s_tls_san}")
+%{ if k3s_subnet != "default_route_table" } 
+local_ip=$(ip -4 route ls ${k3s_subnet} | grep -Po '(?<=src )(\S+)')
+flannel_iface=$(ip -4 route ls ${k3s_subnet} | grep -Po '(?<=dev )(\S+)')
+
+k3s_install_params+=("--node-ip $local_ip")
+k3s_install_params+=("--advertise-address $local_ip")
+k3s_install_params+=("--flannel-iface $flannel_iface")
+%{ endif }
+
+provider_id="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)/$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
+k3s_install_params+=("--kubelet-arg cloud-provider=external")
+k3s_install_params+=("--kubelet-arg provider-id=aws:///$provider_id")
+
+%{ if install_nginx_ingress } 
+k3s_install_params+=("--disable traefik")
+%{ endif }
+
+INSTALL_PARAMS="$${k3s_install_params[*]}"
+
+%{ if k3s_version == "latest" }
+K3S_VERSION=$(curl --silent https://api.github.com/repos/k3s-io/k3s/releases/latest | jq -r '.name')
+%{ else }
+K3S_VERSION="${k3s_version}"
+%{ endif }
+
+first_instance=$(aws ec2 describe-instances --filters Name=tag-value,Values=k3s-server Name=instance-state-name,Values=running --query 'sort_by(Reservations[].Instances[], &LaunchTime)[:-1].[InstanceId]' --output text | head -n1)
+instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+
+if [[ "$first_instance" == "$instance_id" ]]; then
+    echo "I'm the first yeeee: Cluster init!"
+    until (curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=$K3S_VERSION K3S_TOKEN=${k3s_token} sh -s - --cluster-init $INSTALL_PARAMS); do
+      echo 'k3s did not install correctly'
+      sleep 2
+    done
+else
+    echo "I'm like England :( Cluster join"
+    until (curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=$K3S_VERSION K3S_TOKEN=${k3s_token} sh -s - --server https://${k3s_url}:6443 $INSTALL_PARAMS); do
+      echo 'k3s did not install correctly'
+      sleep 2
+    done
+fi
+
+%{ if is_k3s_server }
+until kubectl get pods -A | grep 'Running'; do
+  echo 'Waiting for k3s startup'
+  sleep 5
+done
+
+%{ if install_node_termination_handler }
+#Install node termination handler
+if [[ "$first_instance" == "$instance_id" ]]; then
+  echo 'Install node termination handler'
+  kubectl apply -f https://github.com/aws/aws-node-termination-handler/releases/download/${node_termination_handler_release}/all-resources.yaml
+fi
+%{ endif }
+
+%{ if install_nginx_ingress }
+if [[ "$first_instance" == "$instance_id" ]]; then
+  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-${nginx_ingress_release}/deploy/static/provider/baremetal/deploy.yaml
+  NGINX_RESOURCES_FILE=/root/nginx-ingress-resources.yaml
+  render_nginx_config
+  kubectl apply -f $NGINX_RESOURCES_FILE
+fi
+%{ endif }
+
+%{ if install_certmanager }
+if [[ "$first_instance" == "$instance_id" ]]; then
+  kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${certmanager_release}/cert-manager.yaml
+  
+  # Wait cert-manager to be ready
+  until kubectl get pods -n cert-manager | grep 'Running'; do
+    echo 'Waiting for cert-manager to be ready'
+    sleep 15
+  done
+
+  render_staging_issuer /root/staging_issuer.yaml
+  render_prod_issuer /root/prod_issuer.yaml
+
+  kubectl create -f /root/prod_issuer.yaml
+  kubectl create -f /root/staging_issuer.yaml
 fi
 %{ endif }
 

@@ -50,13 +50,17 @@ edit the main.tf files and set the following variables:
 | `vpc_subnets` | `yes`        | set the list of your VPC subnets. You can find the list of your vpc subnets in your AWS console (Example: subnet-xxxxxx) |
 | `vpc_subnet_cidr` | `yes`        | set your vcp subnet cidr. You can find the VPC subnet CIDR in your AWS console (Example: 172.31.0.0/16) |
 | `cluster_name` | `yes`        | the name of your K3s cluster. Default: k3s-cluster |
-| `k3s_token` | `yes`        | The token of your K3s cluster. [How to](#generate-random-token) generate a random token |
+| `k3s_version`  | `no`  | K3s version. Default: latest |
+| `k3s_subnet`  | `no`  | Subnet where K3s will be exposed. Rquired if the subnet is different from the default gw subnet (Eg. 192.168.1.0/24). Default: default_route_table |
 | `my_public_ip_cidr` | `yes`        |  your public ip in cidr format (Example: 195.102.xxx.xxx/32) |
 | `environment`  | `yes`  | Current work environment (Example: staging/dev/prod). This value is used for tag all the deployed resources |
 | `default_instance_profile_name`  | `no`  | Instance profile name. Default: AWSEC2K3SInstanceProfile |
 | `default_iam_role`  | `no`  | IAM role name. Default: AWSEC2K3SRole |
 | `create_extlb`  | `no`  | Boolean value true/false, specify true for deploy an external LB pointing to k3s worker nodes. Default: false |
 | `install_nginx_ingress`  | `no`  | Boolean value, install kubernetes nginx ingress controller instead of Traefik. Default: true. For more information see [Nginx ingress controller](#nginx-ingress-controller) |
+| `nginx_ingress_release`  | `no`  | nginx ingress controller release. Default: v1.3.1 |
+| `install_node_termination_handler`  | `no`  | Boolean value, install [node termination handler](https://github.com/aws/aws-node-termination-handler)) Default: true. |
+| `node_termination_handler_release`  | `no`  | node termination handler release. Default: v1.17.3 |
 | `install_certmanager`  | `no`  | Boolean value, install [cert manager](https://cert-manager.io/) "Cloud native certificate management". Default: true  |
 | `certmanager_release`  | `no`  | Cert manager release. Default: v1.8.2  |
 | `certmanager_email_address`  | `no`  | Email address used for signing https certificates. Defaul: changeme@example.com  |
@@ -111,14 +115,6 @@ For the cluster autoscaler policy you can find more details [here](https://githu
 The full documentation for the cluster autoscaler is available [here](https://github.com/kubernetes/autoscaler)
 
 The instance profile name is customizable with the variable: *default_instance_profile_name*. The default name for this instance profile is: AWSEC2K3SInstanceProfile.
-
-### Generate random token
-
-Generate random k3s tocken with:
-
-```
-cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 55 | head -n 1
-```
 
 ## Notes about K3s
 
@@ -316,7 +312,7 @@ and see all the nodes provisioned.
 ## Cluster resource deployed
 
 In this setup will be automatically installed on each node of the cluster the Node termination Handler. You can find more details [here](https://github.com/aws/aws-node-termination-handler)
-If for any reason you don't need the node termination handler you can edit the k3s-install-server.sh an comment the lines from 40 to 44
+If for any reason you don't need the node termination handler set the value of *install_node_termination_handler* to *false*
 
 ## Optional cluster resources
 
