@@ -28,7 +28,7 @@ variable "AMIS" {
   default = {
     us-east-1 = "ami-0f01974d5fd3b4530"
     us-west-2 = "ami-09b93cc9c91e4ee20"
-    eu-west-1 = "ami-099b1e41f3043ce3a"
+    eu-west-1 = "ami-0ea0f26a6d50850c5"
   }
 }
 
@@ -101,7 +101,7 @@ variable "vpc_subnets" {
 
 variable "default_instance_type" {
   type        = string
-  default     = "t3.large"
+  default     = "t3.medium"
   description = "Instance type to be used"
 }
 
@@ -109,10 +109,10 @@ variable "instance_types" {
   description = "List of instance types to use"
   type        = map(string)
   default = {
-    asg_instance_type_1 = "t3.large"
-    asg_instance_type_2 = "t2.large"
-    asg_instance_type_3 = "m4.large"
-    asg_instance_type_4 = "t3a.large"
+    asg_instance_type_1 = "t3.medium"
+    asg_instance_type_2 = "t3a.medium"
+    asg_instance_type_3 = "c5a.large"
+    asg_instance_type_4 = "c6a.large"
   }
 }
 

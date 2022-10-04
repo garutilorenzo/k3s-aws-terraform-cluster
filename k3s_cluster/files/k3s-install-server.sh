@@ -1,5 +1,40 @@
 #!/bin/bash
 
+check_os() {
+  name=$(cat /etc/os-release | grep ^NAME= | sed 's/"//g')
+  clean_name=$${name#*=}
+
+  version=$(cat /etc/os-release | grep ^VERSION_ID= | sed 's/"//g')
+  clean_version=$${version#*=}
+  major=$${clean_version%.*}
+  minor=$${clean_version#*.}
+  
+  if [[ "$clean_name" == "Ubuntu" ]]; then
+    operating_system="ubuntu"
+  elif [[ "$clean_name" == "Amazon Linux" ]]; then
+    operating_system="amazonlinux"
+  else
+    operating_system="undef"
+  fi
+
+  echo "K3S install process running on: "
+  echo "OS: $operating_system"
+  echo "OS Major Release: $major"
+  echo "OS Minor Release: $minor"
+}
+
+wait_lb() {
+while [ true ]
+do
+  curl --output /dev/null --silent -k https://${k3s_url}:6443
+  if [[ "$?" -eq 0 ]]; then
+    break
+  fi
+  sleep 5
+  echo "wait for LB"
+done
+}
+
 render_nginx_config(){
 cat << 'EOF' > "$NGINX_RESOURCES_FILE"
 ---
@@ -96,13 +131,23 @@ spec:
 EOF
 }
 
-apt-get update
-apt-get install -y software-properties-common unzip
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-rm -rf aws awscliv2.zip
+check_os
+
+if [[ "$operating_system" == "ubuntu" ]]; then
+  apt-get update
+  apt-get install -y software-properties-common unzip
+  DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip awscliv2.zip
+  sudo ./aws/install
+  rm -rf aws awscliv2.zip
+fi
+
+if [[ "$operating_system" == "amazonlinux" ]]; then
+  yum install -y unzip curl jq
+  aws_region="$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)"
+  export AWS_DEFAULT_REGION=$aws_region
+fi
 
 k3s_install_params=("--tls-san ${k3s_tls_san}")
 %{ if k3s_subnet != "default_route_table" } 
@@ -134,17 +179,18 @@ first_instance=$(aws ec2 describe-instances --filters Name=tag-value,Values=k3s-
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 
 if [[ "$first_instance" == "$instance_id" ]]; then
-    echo "I'm the first yeeee: Cluster init!"
-    until (curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=$K3S_VERSION K3S_TOKEN=${k3s_token} sh -s - --cluster-init $INSTALL_PARAMS); do
-      echo 'k3s did not install correctly'
-      sleep 2
-    done
+  echo "I'm the first yeeee: Cluster init!"
+  until (curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=$K3S_VERSION K3S_TOKEN=${k3s_token} sh -s - --cluster-init $INSTALL_PARAMS); do
+    echo 'k3s did not install correctly'
+    sleep 2
+  done
 else
-    echo "I'm like England :( Cluster join"
-    until (curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=$K3S_VERSION K3S_TOKEN=${k3s_token} sh -s - --server https://${k3s_url}:6443 $INSTALL_PARAMS); do
-      echo 'k3s did not install correctly'
-      sleep 2
-    done
+  echo ":( Cluster join"
+  wait_lb
+  until (curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=$K3S_VERSION K3S_TOKEN=${k3s_token} sh -s - --server https://${k3s_url}:6443 $INSTALL_PARAMS); do
+    echo 'k3s did not install correctly'
+    sleep 2
+  done
 fi
 
 %{ if is_k3s_server }
