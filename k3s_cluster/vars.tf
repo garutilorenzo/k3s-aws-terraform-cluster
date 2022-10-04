@@ -16,6 +16,13 @@ variable "k3s_subnet" {
   default = "default_route_table"
 }
 
+## eu-west-1
+# Ubuntu 22.04
+# ami-099b1e41f3043ce3a
+
+# Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type
+# ami-0ea0f26a6d50850c5
+
 variable "AMIS" {
   type = map(string)
   default = {
