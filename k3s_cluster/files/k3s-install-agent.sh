@@ -20,7 +20,8 @@ k3s_install_params+=("--flannel-iface $flannel_iface")
 %{ endif }
 
 provider_id="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)/$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
-k3s_install_params+=("--kubelet-arg="\""provider-id=aws:///$provider_id"\""")
+k3s_install_params+=("--kubelet-arg cloud-provider=external")
+k3s_install_params+=("--kubelet-arg provider-id=aws:///$provider_id")
 
 INSTALL_PARAMS="$${k3s_install_params[*]}"
 
