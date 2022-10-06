@@ -1,6 +1,7 @@
 resource "aws_efs_file_system" "k3s_persistent_storage" {
   count          = var.efs_persistent_storage ? 1 : 0
   creation_token = "${var.cluster_name}-${var.environment}"
+  encrypted      = true
 
   tags = {
     environment = "${var.environment}"
