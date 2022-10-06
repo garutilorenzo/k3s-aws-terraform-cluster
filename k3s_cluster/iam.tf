@@ -69,7 +69,7 @@ resource "aws_iam_policy" "aws_efs_csi_driver_policy" {
   name        = "AwsEfsCsiDriverPolicy"
   path        = "/"
   description = "AWS EFS CSI driver policy"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
