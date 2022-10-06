@@ -66,6 +66,7 @@ data "template_cloudinit_config" "k3s_server" {
       install_certmanager              = var.install_certmanager,
       efs_persistent_storage           = var.efs_persistent_storage,
       efs_csi_driver_release           = var.efs_csi_driver_release,
+      efs_filesystem_id                = var.efs_persistent_storage ? aws_efs_file_system.k3s_persistent_storage[0].id : "",
       certmanager_release              = var.certmanager_release,
       certmanager_email_address        = var.certmanager_email_address,
       expose_kubeapi                   = var.expose_kubeapi,
