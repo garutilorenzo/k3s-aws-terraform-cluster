@@ -80,6 +80,11 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
   name                = "k3s_workers"
   vpc_zone_identifier = var.vpc_subnets
 
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes        = [load_balancers, target_group_arns]
+  }
+
   mixed_instances_policy {
     instances_distribution {
       on_demand_base_capacity                  = 0
