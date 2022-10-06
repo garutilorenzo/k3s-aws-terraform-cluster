@@ -50,9 +50,10 @@ edit the main.tf files and set the following variables:
 | `vpc_subnets` | `yes`        | set the list of your VPC subnets. You can find the list of your vpc subnets in your AWS console (Example: subnet-xxxxxx) |
 | `vpc_subnet_cidr` | `yes`        | set your vcp subnet cidr. You can find the VPC subnet CIDR in your AWS console (Example: 172.31.0.0/16) |
 | `cluster_name` | `yes`        | the name of your K3s cluster. Default: k3s-cluster |
+| `my_public_ip_cidr` | `yes`        |  your public ip in cidr format (Example: 195.102.xxx.xxx/32) |
 | `k3s_version`  | `no`  | K3s version. Default: latest |
 | `k3s_subnet`  | `no`  | Subnet where K3s will be exposed. Rquired if the subnet is different from the default gw subnet (Eg. 192.168.1.0/24). Default: default_route_table |
-| `my_public_ip_cidr` | `yes`        |  your public ip in cidr format (Example: 195.102.xxx.xxx/32) |
+
 | `environment`  | `yes`  | Current work environment (Example: staging/dev/prod). This value is used for tag all the deployed resources |
 | `default_instance_profile_name`  | `no`  | Instance profile name. Default: AWSEC2K3SInstanceProfile |
 | `default_iam_role`  | `no`  | IAM role name. Default: AWSEC2K3SRole |
@@ -64,8 +65,11 @@ edit the main.tf files and set the following variables:
 | `install_certmanager`  | `no`  | Boolean value, install [cert manager](https://cert-manager.io/) "Cloud native certificate management". Default: true  |
 | `certmanager_release`  | `no`  | Cert manager release. Default: v1.8.2  |
 | `certmanager_email_address`  | `no`  | Email address used for signing https certificates. Defaul: changeme@example.com  |
+| `efs_persistent_storage`  | `no`  | Deploy EFS for persistent sotrage  |
+| `efs_csi_driver_release`  | `no`  | EFS CSI driver Release: v1.4.2   |
 | `extlb_http_port`  | `no`  | http port used by the external LB. Default: 80 |
 | `extlb_https_port`  | `no`  | https port used by the external LB. Default: 443  |
+| `expose_kubeapi`  | `no`  | Boolean value, default false. Expose or not the kubeapi server to the internet. Access is granted only from *my_public_ip_cidr* for security reasons. |
 | `PATH_TO_PUBLIC_KEY`     | `no`       | Path to your public ssh key (Default: "~/.ssh/id_rsa.pub) |
 | `PATH_TO_PRIVATE_KEY` | `no`        | Path to your private ssh key (Default: "~/.ssh/id_rsa) |
 | `default_instance_type` | `no`        | Default instance type used by the Launch template. Default: t3.large |

@@ -89,6 +89,16 @@ variable "certmanager_email_address" {
   default = "changeme@example.com"
 }
 
+variable "efs_persistent_storage" {
+  type    = bool
+  default = false
+}
+
+variable "efs_csi_driver_release" {
+  type    = string
+  default = "v1.4.2"
+}
+
 variable "vpc_subnet_cidr" {
   type        = string
   description = "VPC subnet CIDR"
@@ -101,7 +111,7 @@ variable "vpc_subnets" {
 
 variable "default_instance_type" {
   type        = string
-  default     = "t3.large"
+  default     = "t3.medium"
   description = "Instance type to be used"
 }
 
@@ -109,10 +119,10 @@ variable "instance_types" {
   description = "List of instance types to use"
   type        = map(string)
   default = {
-    asg_instance_type_1 = "t3.large"
-    asg_instance_type_2 = "t2.large"
-    asg_instance_type_3 = "m4.large"
-    asg_instance_type_4 = "t3a.large"
+    asg_instance_type_1 = "t3.medium"
+    asg_instance_type_2 = "t3a.medium"
+    asg_instance_type_3 = "c5a.large"
+    asg_instance_type_4 = "c6a.large"
   }
 }
 
@@ -192,4 +202,9 @@ variable "cluster_name" {
   type        = string
   default     = "k3s-cluster"
   description = "Cluster name"
+}
+
+variable "expose_kubeapi" {
+  type    = bool
+  default = false
 }

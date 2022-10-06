@@ -125,3 +125,59 @@ resource "aws_autoscaling_attachment" "target-https" {
   autoscaling_group_name = aws_autoscaling_group.k3s_workers_asg.name
   lb_target_group_arn    = aws_lb_target_group.external-lb-tg-https[count.index].arn
 }
+
+# kubeapi
+
+resource "aws_lb_listener" "external-lb-listener-kubeapi" {
+  count             = var.expose_kubeapi ? 1 : 0
+  load_balancer_arn = aws_lb.external-lb[count.index].arn
+
+  protocol = "TCP"
+  port     = var.kube_api_port
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.external-lb-tg-kubeapi[count.index].arn
+  }
+
+  tags = {
+    environment = "${var.environment}"
+    provisioner = "terraform"
+  }
+}
+
+resource "aws_lb_target_group" "external-lb-tg-kubeapi" {
+  count    = var.expose_kubeapi ? 1 : 0
+  port     = var.kube_api_port
+  protocol = "TCP"
+  vpc_id   = var.vpc_id
+
+  depends_on = [
+    aws_lb.external-lb
+  ]
+
+  health_check {
+    protocol = "TCP"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    environment = "${var.environment}"
+    provisioner = "terraform"
+  }
+
+}
+
+resource "aws_autoscaling_attachment" "target-kubeapi" {
+  count = var.expose_kubeapi ? 1 : 0
+  depends_on = [
+    aws_autoscaling_group.k3s_servers_asg,
+    aws_lb_target_group.external-lb-tg-kubeapi
+  ]
+
+  autoscaling_group_name = aws_autoscaling_group.k3s_servers_asg.name
+  lb_target_group_arn    = aws_lb_target_group.external-lb-tg-kubeapi[count.index].arn
+}

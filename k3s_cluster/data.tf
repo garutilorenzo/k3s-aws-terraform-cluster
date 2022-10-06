@@ -64,8 +64,12 @@ data "template_cloudinit_config" "k3s_server" {
       install_nginx_ingress            = var.install_nginx_ingress,
       nginx_ingress_release            = var.nginx_ingress_release,
       install_certmanager              = var.install_certmanager,
+      efs_persistent_storage           = var.efs_persistent_storage,
+      efs_csi_driver_release           = var.efs_csi_driver_release,
       certmanager_release              = var.certmanager_release,
       certmanager_email_address        = var.certmanager_email_address,
+      expose_kubeapi                   = var.expose_kubeapi,
+      k3s_tls_san_public               = local.k3s_tls_san_public,
       k3s_url                          = aws_lb.k3s-server-lb.dns_name,
       k3s_tls_san                      = aws_lb.k3s-server-lb.dns_name
     })

@@ -65,6 +65,54 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   }
 }
 
+resource "aws_iam_policy" "aws_efs_csi_driver_policy" {
+  name        = "AwsEfsCsiDriverPolicy"
+  path        = "/"
+  description = "AWS EFS CSI driver policy"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "elasticfilesystem:DescribeAccessPoints",
+        "elasticfilesystem:DescribeFileSystems",
+        "elasticfilesystem:DescribeMountTargets",
+        "ec2:DescribeAvailabilityZones"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "elasticfilesystem:CreateAccessPoint"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "aws:RequestTag/efs.csi.aws.com/cluster": "true"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": "elasticfilesystem:DeleteAccessPoint",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/efs.csi.aws.com/cluster": "true"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+}
+
+
 resource "aws_iam_role_policy_attachment" "attach_ec2_ro_policy" {
   role       = aws_iam_role.aws_ec2_custom_role.name
   policy_arn = data.aws_iam_policy.AmazonEC2ReadOnlyAccess.arn
@@ -78,4 +126,9 @@ resource "aws_iam_role_policy_attachment" "attach_ssm_policy" {
 resource "aws_iam_role_policy_attachment" "attach_cluster_autoscaler_policy" {
   role       = aws_iam_role.aws_ec2_custom_role.name
   policy_arn = aws_iam_policy.cluster_autoscaler.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_aws_efs_csi_driver_policy_policy" {
+  role       = aws_iam_role.aws_ec2_custom_role.name
+  policy_arn = aws_iam_policy.aws_efs_csi_driver_policy.arn
 }
