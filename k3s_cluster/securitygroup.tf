@@ -3,11 +3,12 @@ resource "aws_security_group" "allow-strict" {
   name        = "allow-strict"
   description = "security group that allows ssh and all egress traffic"
 
-  tags = {
-    Name        = "allow-strict"
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-allow-strict")
+    }
+  )
 }
 
 resource "aws_security_group_rule" "ingress_self" {
@@ -94,6 +95,13 @@ resource "aws_security_group" "efs-sg" {
     protocol    = "tcp"
     cidr_blocks = [var.vpc_subnet_cidr]
   }
+
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-efs-sg")
+    }
+  )
 }
 
 resource "aws_security_group" "lambda-sg" {
@@ -121,6 +129,13 @@ resource "aws_security_group" "lambda-sg" {
     from_port = 0
     to_port   = 0
   }
+
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-lambda-sg")
+    }
+  )
 }
 
 resource "aws_security_group" "internal-vpce-sg" {
@@ -148,4 +163,11 @@ resource "aws_security_group" "internal-vpce-sg" {
     from_port = 0
     to_port   = 0
   }
+
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-internal-vpce")
+    }
+  )
 }

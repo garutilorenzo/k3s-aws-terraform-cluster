@@ -8,11 +8,12 @@ resource "aws_lb" "external-lb" {
 
   enable_cross_zone_load_balancing = true
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
-
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-external-lb")
+    }
+  )
 }
 
 resource "aws_lb_listener" "external-lb-listener-http" {
@@ -27,10 +28,12 @@ resource "aws_lb_listener" "external-lb-listener-http" {
     target_group_arn = aws_lb_target_group.external-lb-tg-http[count.index].arn
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-http-listener")
+    }
+  )
 }
 
 resource "aws_lb_target_group" "external-lb-tg-http" {
@@ -52,10 +55,12 @@ resource "aws_lb_target_group" "external-lb-tg-http" {
     create_before_destroy = true
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-external-lb-tg-http")
+    }
+  )
 }
 
 resource "aws_autoscaling_attachment" "target-http" {
@@ -83,10 +88,12 @@ resource "aws_lb_listener" "external-lb-listener-https" {
     target_group_arn = aws_lb_target_group.external-lb-tg-https[count.index].arn
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-https-listener")
+    }
+  )
 }
 
 resource "aws_lb_target_group" "external-lb-tg-https" {
@@ -108,11 +115,12 @@ resource "aws_lb_target_group" "external-lb-tg-https" {
     create_before_destroy = true
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
-
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-external-lb-tg-https")
+    }
+  )
 }
 
 resource "aws_autoscaling_attachment" "target-https" {
@@ -140,10 +148,12 @@ resource "aws_lb_listener" "external-lb-listener-kubeapi" {
     target_group_arn = aws_lb_target_group.external-lb-tg-kubeapi[count.index].arn
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-kubeapi-listener")
+    }
+  )
 }
 
 resource "aws_lb_target_group" "external-lb-tg-kubeapi" {
@@ -164,11 +174,12 @@ resource "aws_lb_target_group" "external-lb-tg-kubeapi" {
     create_before_destroy = true
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
-
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-external-lb-tg-kubeapi")
+    }
+  )
 }
 
 resource "aws_autoscaling_attachment" "target-kubeapi" {

@@ -28,10 +28,12 @@ resource "aws_launch_template" "k3s_server" {
     hostname_type = "resource-name"
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-k3s-server-tpl")
+    }
+  )
 
 }
 
@@ -65,8 +67,10 @@ resource "aws_launch_template" "k3s_agent" {
     hostname_type = "resource-name"
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-k3s-agent-tpl")
+    }
+  )
 }

@@ -41,7 +41,7 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
 
   tag {
     key                 = "Name"
-    value               = "${var.cluster_name}-k3s-server-${var.environment}"
+    value               = "${local.common_prefix}-k3s-server"
     propagate_at_launch = true
   }
 
@@ -118,7 +118,7 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
 
   tag {
     key                 = "Name"
-    value               = "${var.cluster_name}-k3s-worker-${var.environment}"
+    value               = "${local.common_prefix}-k3s-worker"
     propagate_at_launch = true
   }
 

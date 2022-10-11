@@ -15,6 +15,17 @@ data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
   arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+data "aws_iam_policy_document" "lambda-assume-role-policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
 data "aws_instances" "k3s_servers" {
 
   depends_on = [
@@ -103,16 +114,5 @@ data "template_cloudinit_config" "k3s_agent" {
       k3s_url       = aws_lb.k3s-server-lb.dns_name,
       k3s_tls_san   = aws_lb.k3s-server-lb.dns_name
     })
-  }
-}
-
-data "aws_iam_policy_document" "lambda-assume-role-policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
   }
 }

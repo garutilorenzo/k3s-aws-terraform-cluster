@@ -3,10 +3,12 @@ resource "aws_efs_file_system" "k3s_persistent_storage" {
   creation_token = "${var.cluster_name}-${var.environment}"
   encrypted      = true
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-efs-persistent-storage")
+    }
+  )
 }
 
 resource "aws_efs_mount_target" "k3s_persistent_storage_mount_target" {

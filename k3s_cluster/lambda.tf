@@ -22,10 +22,12 @@ resource "aws_lambda_function" "k8s_cleaner_lambda_function" {
     }
   }
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-k8s-cleaner")
+    }
+  )
 }
 
 resource "aws_lambda_event_source_mapping" "trigger_lambda_on_ec2_interruption" {

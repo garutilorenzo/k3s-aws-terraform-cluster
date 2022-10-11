@@ -9,4 +9,11 @@ resource "aws_vpc_endpoint" "vpce_secretsmanager" {
   ]
 
   private_dns_enabled = true
+
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-secretsmanager-vpce")
+    }
+  )
 }

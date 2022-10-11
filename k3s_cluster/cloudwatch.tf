@@ -9,10 +9,12 @@ resource "aws_cloudwatch_event_rule" "ec2_spot_interruption_warn" {
     detail-type = ["EC2 Spot Instance Interruption Warning"]
   })
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-spot-interruption")
+    }
+  )
 }
 
 resource "aws_cloudwatch_event_target" "ec2_spot_interruption_warn_sqs" {
@@ -25,10 +27,12 @@ resource "aws_sqs_queue" "ec2_spot_interruption_warn_queue" {
   name                      = "ec2-spot-interruption-warning"
   message_retention_seconds = 7200
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-spot-interruption-queue")
+    }
+  )
 }
 
 resource "aws_sqs_queue_policy" "ec2_spot_interruption_warn_queue_policy" {
@@ -78,10 +82,12 @@ resource "aws_cloudwatch_event_rule" "ec2_spot_request_fulfillment" {
     detail-type = ["EC2 Spot Instance Interruption Warning"]
   })
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-spot-fulfillment")
+    }
+  )
 }
 
 resource "aws_cloudwatch_event_target" "ec2_spot_request_fulfillment_sqs" {
@@ -94,10 +100,12 @@ resource "aws_sqs_queue" "ec2_spot_request_fulfillment_queue" {
   name                      = "ec2-spot-request-fulfillment"
   message_retention_seconds = 7200
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-spot-fulfillment-queue")
+    }
+  )
 }
 
 resource "aws_sqs_queue_policy" "ec2_spot_request_fulfillment_queue_policy" {

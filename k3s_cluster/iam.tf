@@ -2,11 +2,12 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = var.default_instance_profile_name
   role = aws_iam_role.aws_ec2_custom_role.name
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
-
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-ec2-instance-profile")
+    }
+  )
 }
 
 resource "aws_iam_role" "aws_ec2_custom_role" {
@@ -26,10 +27,12 @@ resource "aws_iam_role" "aws_ec2_custom_role" {
     ]
   })
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-ec2-custom-role")
+    }
+  )
 
 }
 
@@ -59,10 +62,12 @@ resource "aws_iam_policy" "cluster_autoscaler" {
     ]
   })
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-cluster-autoscaler-policy")
+    }
+  )
 }
 
 resource "aws_iam_policy" "aws_efs_csi_driver_policy" {
@@ -115,6 +120,13 @@ resource "aws_iam_policy" "aws_efs_csi_driver_policy" {
       },
     ]
   })
+
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-csi-driver-policy")
+    }
+  )
 }
 
 
@@ -144,10 +156,12 @@ resource "aws_iam_policy" "allow_secrets_manager" {
     ]
   })
 
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-secrets-manager-policy")
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "attach_ec2_ro_policy" {
@@ -170,20 +184,22 @@ resource "aws_iam_role_policy_attachment" "attach_aws_efs_csi_driver_policy" {
   policy_arn = aws_iam_policy.aws_efs_csi_driver_policy.arn
 }
 
-## Lambda
-
 resource "aws_iam_role_policy_attachment" "attach_allow_secrets_manager_policy" {
   role       = aws_iam_role.aws_ec2_custom_role.name
   policy_arn = aws_iam_policy.allow_secrets_manager.arn
 }
 
+## Lambda
+
 resource "aws_iam_role" "k8s_cleaner_lambda_role" {
   name               = "k8s_cleaner_lambda_IAM_role"
   assume_role_policy = data.aws_iam_policy_document.lambda-assume-role-policy.json
-  tags = {
-    environment = "${var.environment}"
-    provisioner = "terraform"
-  }
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-k8s-cleaner-role")
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "k8s_cleaner_lambda_attachment" {
@@ -224,4 +240,11 @@ resource "aws_iam_policy" "k8s_cleaner_lambda_policy" {
       }
     ]
   })
+
+  tags = merge(
+    local.global_tags,
+    {
+      "Name" = lower("${local.common_prefix}-k8s-cleaner-policy")
+    }
+  )
 }
