@@ -42,8 +42,8 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
   dynamic "tag" {
     for_each = local.global_tags
     content {
-      key   = tag.key
-      value = tag.value
+      key                 = tag.key
+      value               = tag.value
       propagate_at_launch = true
     }
   }
@@ -116,8 +116,8 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
   dynamic "tag" {
     for_each = local.global_tags
     content {
-      key   = tag.key
-      value = tag.value
+      key                 = tag.key
+      value               = tag.value
       propagate_at_launch = true
     }
   }
