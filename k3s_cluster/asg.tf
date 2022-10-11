@@ -39,21 +39,18 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
   health_check_type         = "EC2"
   force_delete              = true
 
+  dynamic "tag" {
+    for_each = local.global_tags
+    content {
+      key   = tag.key
+      value = tag.value
+      propagate_at_launch = true
+    }
+  }
+
   tag {
     key                 = "Name"
     value               = "${local.common_prefix}-k3s-server"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "provisioner"
-    value               = "terraform"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "environment"
-    value               = var.environment
     propagate_at_launch = true
   }
 
@@ -116,21 +113,18 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
   health_check_type         = "EC2"
   force_delete              = true
 
+  dynamic "tag" {
+    for_each = local.global_tags
+    content {
+      key   = tag.key
+      value = tag.value
+      propagate_at_launch = true
+    }
+  }
+
   tag {
     key                 = "Name"
     value               = "${local.common_prefix}-k3s-worker"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "provisioner"
-    value               = "terraform"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "environment"
-    value               = var.environment
     propagate_at_launch = true
   }
 
