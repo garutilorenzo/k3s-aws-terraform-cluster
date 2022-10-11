@@ -193,7 +193,7 @@ resource "aws_iam_role_policy_attachment" "attach_allow_secrets_manager_policy" 
 
 resource "aws_iam_role" "k8s_cleaner_lambda_role" {
   name               = "k8s_cleaner_lambda_IAM_role"
-  assume_role_policy = data.aws_iam_policy_document.lambda-assume-role-policy.json
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role_policy.json
   tags = merge(
     local.global_tags,
     {

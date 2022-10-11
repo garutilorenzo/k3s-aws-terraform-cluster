@@ -21,7 +21,7 @@ resource "aws_launch_template" "k3s_server" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.allow-strict.id]
+    security_groups             = [aws_security_group.allow_strict.id]
   }
 
   private_dns_name_options {
@@ -60,7 +60,7 @@ resource "aws_launch_template" "k3s_agent" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.allow-strict.id]
+    security_groups             = [aws_security_group.allow_strict.id]
   }
 
   private_dns_name_options {

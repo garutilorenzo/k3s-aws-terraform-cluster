@@ -9,7 +9,7 @@ resource "aws_lambda_function" "k8s_cleaner_lambda_function" {
 
   vpc_config {
     subnet_ids         = var.vpc_subnets
-    security_group_ids = [aws_security_group.lambda-sg.id]
+    security_group_ids = [aws_security_group.lambda_sg.id]
   }
 
   role = aws_iam_role.k8s_cleaner_lambda_role.arn

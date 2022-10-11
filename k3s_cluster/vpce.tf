@@ -5,7 +5,7 @@ resource "aws_vpc_endpoint" "vpce_secretsmanager" {
 
   subnet_ids = var.vpc_subnets
   security_group_ids = [
-    aws_security_group.internal-vpce-sg.id,
+    aws_security_group.internal_vpce_sg.id,
   ]
 
   private_dns_enabled = true

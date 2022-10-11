@@ -1,4 +1,4 @@
-resource "aws_security_group" "allow-strict" {
+resource "aws_security_group" "allow_strict" {
   vpc_id      = var.vpc_id
   name        = "allow-strict"
   description = "security group that allows ssh and all egress traffic"
@@ -17,7 +17,7 @@ resource "aws_security_group_rule" "ingress_self" {
   to_port           = 0
   protocol          = "-1"
   self              = true
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
 resource "aws_security_group_rule" "ingress_kubeapi" {
@@ -26,7 +26,7 @@ resource "aws_security_group_rule" "ingress_kubeapi" {
   to_port           = var.kube_api_port
   protocol          = "tcp"
   cidr_blocks       = [var.vpc_subnet_cidr]
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
 resource "aws_security_group_rule" "ingress_ssh" {
@@ -35,7 +35,7 @@ resource "aws_security_group_rule" "ingress_ssh" {
   to_port           = 22
   protocol          = "tcp"
   cidr_blocks       = [var.my_public_ip_cidr]
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
 resource "aws_security_group_rule" "egress_all" {
@@ -44,7 +44,7 @@ resource "aws_security_group_rule" "egress_all" {
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
 resource "aws_security_group_rule" "allow_lb_http_traffic" {
@@ -54,7 +54,7 @@ resource "aws_security_group_rule" "allow_lb_http_traffic" {
   to_port           = var.extlb_http_port
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
 resource "aws_security_group_rule" "allow_lb_https_traffic" {
@@ -64,7 +64,7 @@ resource "aws_security_group_rule" "allow_lb_https_traffic" {
   to_port           = var.extlb_https_port
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
 resource "aws_security_group_rule" "allow_lb_kubeapi_traffic" {
@@ -74,10 +74,10 @@ resource "aws_security_group_rule" "allow_lb_kubeapi_traffic" {
   to_port           = var.kube_api_port
   protocol          = "tcp"
   cidr_blocks       = [var.my_public_ip_cidr]
-  security_group_id = aws_security_group.allow-strict.id
+  security_group_id = aws_security_group.allow_strict.id
 }
 
-resource "aws_security_group" "efs-sg" {
+resource "aws_security_group" "efs_sg" {
   vpc_id      = var.vpc_id
   name        = "efs-security-group"
   description = "Allow EFS access from VPC subnets"
@@ -104,7 +104,7 @@ resource "aws_security_group" "efs-sg" {
   )
 }
 
-resource "aws_security_group" "lambda-sg" {
+resource "aws_security_group" "lambda_sg" {
   vpc_id      = var.vpc_id
   name        = "lambda-security-group"
   description = "Allow lambda function to access kubeapi"
@@ -138,7 +138,7 @@ resource "aws_security_group" "lambda-sg" {
   )
 }
 
-resource "aws_security_group" "internal-vpce-sg" {
+resource "aws_security_group" "internal_vpce_sg" {
   vpc_id      = var.vpc_id
   name        = "internal-vpce-sg"
   description = "Allow all traffic trought vpce"

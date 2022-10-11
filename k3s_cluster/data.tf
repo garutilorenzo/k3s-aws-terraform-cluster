@@ -15,7 +15,7 @@ data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
   arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-data "aws_iam_policy_document" "lambda-assume-role-policy" {
+data "aws_iam_policy_document" "lambda_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -86,8 +86,8 @@ data "template_cloudinit_config" "k3s_server" {
       certmanager_email_address        = var.certmanager_email_address,
       expose_kubeapi                   = var.expose_kubeapi,
       k3s_tls_san_public               = local.k3s_tls_san_public,
-      k3s_url                          = aws_lb.k3s-server-lb.dns_name,
-      k3s_tls_san                      = aws_lb.k3s-server-lb.dns_name,
+      k3s_url                          = aws_lb.k3s_server_lb.dns_name,
+      k3s_tls_san                      = aws_lb.k3s_server_lb.dns_name,
       kubeconfig_secret_name           = local.kubeconfig_secret_name
     })
   }
@@ -111,8 +111,8 @@ data "template_cloudinit_config" "k3s_agent" {
       k3s_token     = random_password.k3s_token.result,
       k3s_subnet    = var.k3s_subnet,
       is_k3s_server = false,
-      k3s_url       = aws_lb.k3s-server-lb.dns_name,
-      k3s_tls_san   = aws_lb.k3s-server-lb.dns_name
+      k3s_url       = aws_lb.k3s_server_lb.dns_name,
+      k3s_tls_san   = aws_lb.k3s_server_lb.dns_name
     })
   }
 }
