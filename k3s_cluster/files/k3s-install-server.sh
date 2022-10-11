@@ -251,6 +251,12 @@ if [[ "$first_instance" == "$instance_id" ]]; then
 fi
 %{ endif }
 
+# TEST AWS SECRET MANAGER
+if [[ "$first_instance" == "$instance_id" ]]; then
+  cat /etc/rancher/k3s/k3s.yaml | sed 's/server: https:\/\/127.0.0.1:6443/server: https:\/\/${k3s_url}:6443/' > /root/k3s_lb.yaml
+  aws secretsmanager update-secret --secret-id ${kubeconfig_secret_name} --secret-string file:///root/k3s_lb.yaml
+fi
+
 %{ endif }
 
 #kubectl get pods -n kube-system | grep aws-node | wc -l

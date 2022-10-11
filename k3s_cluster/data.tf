@@ -7,6 +7,10 @@ data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
   arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
 }
 
+data "aws_iam_policy" "AWSLambdaVPCAccessExecutionRole" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
 data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
   arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
@@ -72,7 +76,8 @@ data "template_cloudinit_config" "k3s_server" {
       expose_kubeapi                   = var.expose_kubeapi,
       k3s_tls_san_public               = local.k3s_tls_san_public,
       k3s_url                          = aws_lb.k3s-server-lb.dns_name,
-      k3s_tls_san                      = aws_lb.k3s-server-lb.dns_name
+      k3s_tls_san                      = aws_lb.k3s-server-lb.dns_name,
+      kubeconfig_secret_name           = local.kubeconfig_secret_name
     })
   }
 }
@@ -98,5 +103,16 @@ data "template_cloudinit_config" "k3s_agent" {
       k3s_url       = aws_lb.k3s-server-lb.dns_name,
       k3s_tls_san   = aws_lb.k3s-server-lb.dns_name
     })
+  }
+}
+
+data "aws_iam_policy_document" "lambda-assume-role-policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
   }
 }

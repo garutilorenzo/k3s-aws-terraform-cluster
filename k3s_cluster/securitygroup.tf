@@ -95,3 +95,57 @@ resource "aws_security_group" "efs-sg" {
     cidr_blocks = [var.vpc_subnet_cidr]
   }
 }
+
+resource "aws_security_group" "lambda-sg" {
+  vpc_id      = var.vpc_id
+  name        = "lambda-security-group"
+  description = "Allow lambda function to access kubeapi"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = var.kube_api_port
+    to_port     = var.kube_api_port
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_subnet_cidr]
+  }
+
+  ingress {
+    protocol  = "-1"
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+}
+
+resource "aws_security_group" "internal-vpce-sg" {
+  vpc_id      = var.vpc_id
+  name        = "internal-vpce-sg"
+  description = "Allow all traffic trought vpce"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_subnet_cidr]
+  }
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_subnet_cidr]
+  }
+
+  ingress {
+    protocol  = "-1"
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+}
