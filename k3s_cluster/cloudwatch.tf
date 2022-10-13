@@ -25,6 +25,7 @@ resource "aws_cloudwatch_event_target" "ec2_spot_interruption_warn_sqs" {
 
 resource "aws_sqs_queue" "ec2_spot_interruption_warn_queue" {
   name                      = "${var.common_prefix}-ec2-spot-interruption-warn-queue-${var.environment}"
+  sqs_managed_sse_enabled   = true
   message_retention_seconds = 7200
 
   tags = merge(
@@ -98,6 +99,7 @@ resource "aws_cloudwatch_event_target" "ec2_spot_request_fulfillment_sqs" {
 
 resource "aws_sqs_queue" "ec2_spot_request_fulfillment_queue" {
   name                      = "${var.common_prefix}-ec2-spot-fulfillment-queue-${var.environment}"
+  sqs_managed_sse_enabled   = true
   message_retention_seconds = 7200
 
   tags = merge(
