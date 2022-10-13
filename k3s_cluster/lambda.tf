@@ -30,7 +30,10 @@ resource "aws_lambda_function" "kube_cleaner_lambda_function" {
   )
 }
 
+# Wait 180 seconds before invoking the lambda function
+# The spot interruption warning is send 120 before the instance termination
 resource "aws_lambda_event_source_mapping" "trigger_lambda_on_ec2_interruption" {
-  event_source_arn = aws_sqs_queue.ec2_spot_interruption_warn_queue.arn
-  function_name    = aws_lambda_function.kube_cleaner_lambda_function.arn
+  event_source_arn                   = aws_sqs_queue.ec2_spot_interruption_warn_queue.arn
+  function_name                      = aws_lambda_function.kube_cleaner_lambda_function.arn
+  maximum_batching_window_in_seconds = 180
 }
