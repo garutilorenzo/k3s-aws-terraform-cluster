@@ -148,6 +148,8 @@ Notes about the auoscaling group:
 
 You can change this setting by editing the value of on_demand_percentage_above_base_capacity in asg.tf. You can require that all the EC2 will be launced using on-demand instances setting on_demand_percentage_above_base_capacity to 100. More details [here](https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstancesDistribution.html)
 
+### Infrastructure schema
+
 <p align="center">
   <img src="https://garutilorenzo.github.io/images/k3s-aws-cluster.png?" alt="k3s-aws-cluster"/>
 </p>
