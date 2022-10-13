@@ -23,11 +23,11 @@ jobs:
           python-version: '3.10'
 
       - name: Download kubernetes module
-        run: pip install --target k3s_cluster/lambda/k8s_cleaner_src/ kubernetes
+        run: pip install --target k3s_cluster/lambda/kube_cleaner_src/ kubernetes
       
       - name: create lambda func zip
-        run: zip -r ../k8s_cleaner.zip .
-        working-directory: k3s_cluster/lambda/k8s_cleaner_src/
+        run: zip -r ../kube_cleaner.zip .
+        working-directory: k3s_cluster/lambda/kube_cleaner_src/
 
       - name: Run a Terraform init
         uses: docker://hashicorp/terraform:light
