@@ -100,7 +100,7 @@ resource "aws_iam_policy" "aws_efs_csi_driver_policy" {
         ],
         Condition = {
           StringLike = {
-            "aws:ResourceTag/efs.csi.aws.com/cluster" = "true"
+            "aws:RequestTag/efs.csi.aws.com/cluster" = "true"
           }
         }
       },
