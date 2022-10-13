@@ -1,7 +1,7 @@
 ### EC2 Spot request interruption warning
 
 resource "aws_cloudwatch_event_rule" "ec2_spot_interruption_warn" {
-  name        = "EC2SpotInterruptionWarning"
+  name        = "${var.common_prefix}-ec2-spot-interruption-warn-${var.environment}"
   description = "Capture EC2 Spot Interruption warning"
 
   event_pattern = jsonencode({
@@ -12,7 +12,7 @@ resource "aws_cloudwatch_event_rule" "ec2_spot_interruption_warn" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-spot-interruption")
+      "Name" = lower("${var.common_prefix}-ec2-spot-interruption-warn-${var.environment}")
     }
   )
 }
@@ -24,13 +24,13 @@ resource "aws_cloudwatch_event_target" "ec2_spot_interruption_warn_sqs" {
 }
 
 resource "aws_sqs_queue" "ec2_spot_interruption_warn_queue" {
-  name                      = "ec2-spot-interruption-warning"
+  name                      = "${var.common_prefix}-ec2-spot-interruption-warn-queue-${var.environment}"
   message_retention_seconds = 7200
 
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-spot-interruption-queue")
+      "Name" = lower("${var.common_prefix}-ec2-spot-interruption-warn-queue-${var.environment}")
     }
   )
 }
@@ -64,7 +64,7 @@ resource "aws_sqs_queue_policy" "ec2_spot_interruption_warn_queue_policy" {
           "sqs:GetQueueAttributes"
         ]
         Resource = [
-          "${aws_lambda_function.k8s_cleaner_lambda_function.arn}",
+          "${aws_lambda_function.kube_cleaner_lambda_function.arn}",
         ]
       }
     ]
@@ -74,7 +74,7 @@ resource "aws_sqs_queue_policy" "ec2_spot_interruption_warn_queue_policy" {
 ### EC2 Spot request fulfillment
 
 resource "aws_cloudwatch_event_rule" "ec2_spot_request_fulfillment" {
-  name        = "EC2SpotRequestFulfillment"
+  name        = "${var.common_prefix}-ec2-spot-fulfillment-${var.environment}"
   description = "Capture EC2 Spot Interruption warning"
 
   event_pattern = jsonencode({
@@ -85,7 +85,7 @@ resource "aws_cloudwatch_event_rule" "ec2_spot_request_fulfillment" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-spot-fulfillment")
+      "Name" = lower("${var.common_prefix}-ec2-spot-fulfillment-${var.environment}")
     }
   )
 }
@@ -97,13 +97,13 @@ resource "aws_cloudwatch_event_target" "ec2_spot_request_fulfillment_sqs" {
 }
 
 resource "aws_sqs_queue" "ec2_spot_request_fulfillment_queue" {
-  name                      = "ec2-spot-request-fulfillment"
+  name                      = "${var.common_prefix}-ec2-spot-fulfillment-queue-${var.environment}"
   message_retention_seconds = 7200
 
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-spot-fulfillment-queue")
+      "Name" = lower("${var.common_prefix}-ec2-spot-fulfillment-queue-${var.environment}")
     }
   )
 }
@@ -137,7 +137,7 @@ resource "aws_sqs_queue_policy" "ec2_spot_request_fulfillment_queue_policy" {
           "sqs:GetQueueAttributes"
         ]
         Resource = [
-          "${aws_lambda_function.k8s_cleaner_lambda_function.arn}",
+          "${aws_lambda_function.kube_cleaner_lambda_function.arn}",
         ]
       }
     ]

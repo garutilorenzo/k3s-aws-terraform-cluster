@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "k3s_servers_asg" {
-  name                      = "k3s_servers"
+  name                      = "${var.common_prefix}-servers-asg-${var.environment}"
   wait_for_capacity_timeout = "5m"
   vpc_zone_identifier       = var.vpc_subnets
 
@@ -50,7 +50,7 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
 
   tag {
     key                 = "Name"
-    value               = "${local.common_prefix}-k3s-server"
+    value               = "${var.common_prefix}-server-${var.environment}"
     propagate_at_launch = true
   }
 
@@ -74,7 +74,7 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
 }
 
 resource "aws_autoscaling_group" "k3s_workers_asg" {
-  name                = "k3s_workers"
+  name                = "${var.common_prefix}-workers-asg-${var.environment}"
   vpc_zone_identifier = var.vpc_subnets
 
   lifecycle {
@@ -124,7 +124,7 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
 
   tag {
     key                 = "Name"
-    value               = "${local.common_prefix}-k3s-worker"
+    value               = "${var.common_prefix}-worker-${var.environment}"
     propagate_at_launch = true
   }
 

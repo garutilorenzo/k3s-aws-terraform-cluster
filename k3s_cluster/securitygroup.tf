@@ -1,12 +1,12 @@
 resource "aws_security_group" "allow_strict" {
   vpc_id      = var.vpc_id
-  name        = "allow-strict"
+  name        = "${var.common_prefix}-allow-strict-${var.environment}"
   description = "security group that allows ssh and all egress traffic"
 
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-allow-strict")
+      "Name" = lower("${var.common_prefix}-allow-strict-${var.environment}")
     }
   )
 }
@@ -79,7 +79,7 @@ resource "aws_security_group_rule" "allow_lb_kubeapi_traffic" {
 
 resource "aws_security_group" "efs_sg" {
   vpc_id      = var.vpc_id
-  name        = "efs-security-group"
+  name        = "${var.common_prefix}-efs-sg-${var.environment}"
   description = "Allow EFS access from VPC subnets"
 
   egress {
@@ -99,14 +99,14 @@ resource "aws_security_group" "efs_sg" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-efs-sg")
+      "Name" = lower("${var.common_prefix}-efs-sg-${var.environment}")
     }
   )
 }
 
 resource "aws_security_group" "lambda_sg" {
   vpc_id      = var.vpc_id
-  name        = "lambda-security-group"
+  name        = "${var.common_prefix}-lambda-sg-${var.environment}"
   description = "Allow lambda function to access kubeapi"
 
   egress {
@@ -133,14 +133,14 @@ resource "aws_security_group" "lambda_sg" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-lambda-sg")
+      "Name" = lower("${var.common_prefix}-lambda-sg-${var.environment}")
     }
   )
 }
 
 resource "aws_security_group" "internal_vpce_sg" {
   vpc_id      = var.vpc_id
-  name        = "internal-vpce-sg"
+  name        = "${var.common_prefix}-int-vpce-sg-${var.environment}"
   description = "Allow all traffic trought vpce"
 
   egress {
@@ -167,7 +167,7 @@ resource "aws_security_group" "internal_vpce_sg" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-internal-vpce")
+      "Name" = lower("${var.common_prefix}-int-vpce-sg-${var.environment}")
     }
   )
 }

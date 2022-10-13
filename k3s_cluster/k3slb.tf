@@ -1,5 +1,5 @@
 resource "aws_lb" "k3s_server_lb" {
-  name               = "k3s-server-tcp-lb"
+  name               = "${var.common_prefix}-int-lb-${var.environment}"
   load_balancer_type = "network"
   internal           = "true"
   subnets            = var.vpc_subnets
@@ -9,7 +9,7 @@ resource "aws_lb" "k3s_server_lb" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-internal-lb")
+      "Name" = lower("${var.common_prefix}-int-lb-${var.environment}")
     }
   )
 }
@@ -28,7 +28,7 @@ resource "aws_lb_listener" "k3s_server_listener" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-kubeapi-listener")
+      "Name" = lower("${var.common_prefix}-kubeapi-listener-${var.environment}")
     }
   )
 }
@@ -54,7 +54,7 @@ resource "aws_lb_target_group" "k3s_server_tg" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-internal-lb-tg-kubeapi")
+      "Name" = lower("${var.common_prefix}-internal-lb-tg-kubeapi-${var.environment}")
     }
   )
 }

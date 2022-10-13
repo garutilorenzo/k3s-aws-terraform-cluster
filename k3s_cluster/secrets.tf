@@ -5,7 +5,7 @@ resource "aws_secretsmanager_secret" "kubeconfig_secret" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-kubeconfig-secret")
+      "Name" = lower("${local.kubeconfig_secret_name}")
     }
   )
 }

@@ -1,5 +1,5 @@
 resource "aws_launch_template" "k3s_server" {
-  name_prefix   = "k3s_server_tpl"
+  name_prefix   = "${var.common_prefix}-k3s-server-tpl-${var.environment}"
   image_id      = var.AMIS[var.AWS_REGION]
   instance_type = var.default_instance_type
   user_data     = data.template_cloudinit_config.k3s_server.rendered
@@ -31,14 +31,14 @@ resource "aws_launch_template" "k3s_server" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-k3s-server-tpl")
+      "Name" = lower("${var.common_prefix}-k3s-server-tpl-${var.environment}")
     }
   )
 
 }
 
 resource "aws_launch_template" "k3s_agent" {
-  name_prefix   = "k3s_agent_tpl"
+  name_prefix   = "${var.common_prefix}-k3s-agent-tpl-${var.environment}"
   image_id      = var.AMIS[var.AWS_REGION]
   instance_type = var.default_instance_type
   user_data     = data.template_cloudinit_config.k3s_agent.rendered
@@ -70,7 +70,7 @@ resource "aws_launch_template" "k3s_agent" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-k3s-agent-tpl")
+      "Name" = lower("${var.common_prefix}-k3s-agent-tpl-${var.environment}")
     }
   )
 }

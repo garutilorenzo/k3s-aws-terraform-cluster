@@ -6,6 +6,11 @@ variable "environment" {
   type = string
 }
 
+variable "common_prefix" {
+  type    = string
+  default = "k3s"
+}
+
 variable "k3s_version" {
   type    = string
   default = "latest"
@@ -124,18 +129,6 @@ variable "instance_types" {
     asg_instance_type_3 = "c5a.large"
     asg_instance_type_4 = "c6a.large"
   }
-}
-
-variable "default_instance_profile_name" {
-  type        = string
-  default     = "AWSEC2K3SInstanceProfile"
-  description = "Default instance profile name"
-}
-
-variable "default_iam_role" {
-  type        = string
-  default     = "AWSEC2K3SRole"
-  description = "Default IAM role name"
 }
 
 variable "kube_api_port" {

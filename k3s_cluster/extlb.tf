@@ -1,7 +1,7 @@
 # HTTP
 resource "aws_lb" "external_lb" {
   count              = var.create_extlb ? 1 : 0
-  name               = "external-lb"
+  name               = "${var.common_prefix}-ext-lb-${var.environment}"
   load_balancer_type = "network"
   internal           = "false"
   subnets            = var.vpc_subnets
@@ -11,7 +11,7 @@ resource "aws_lb" "external_lb" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-external-lb")
+      "Name" = lower("${var.common_prefix}-ext-lb-${var.environment}")
     }
   )
 }
@@ -31,7 +31,7 @@ resource "aws_lb_listener" "external_lb_listener_http" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-http-listener")
+      "Name" = lower("${var.common_prefix}-http-listener-${var.environment}")
     }
   )
 }
@@ -58,7 +58,7 @@ resource "aws_lb_target_group" "external_lb_tg_http" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-external_lb_tg_http")
+      "Name" = lower("${var.common_prefix}-ext-lb-tg-http-${var.environment}")
     }
   )
 }
@@ -91,7 +91,7 @@ resource "aws_lb_listener" "external_lb_listener_https" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-https-listener")
+      "Name" = lower("${var.common_prefix}-https-listener-${var.environment}")
     }
   )
 }
@@ -118,7 +118,7 @@ resource "aws_lb_target_group" "external_lb_tg_https" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-external_lb_tg_https")
+      "Name" = lower("${var.common_prefix}-ext-lb-tg-https-${var.environment}")
     }
   )
 }
@@ -151,7 +151,7 @@ resource "aws_lb_listener" "external_lb_listener_kubeapi" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-kubeapi-listener")
+      "Name" = lower("${var.common_prefix}-kubeapi-listener-${var.environment}")
     }
   )
 }
@@ -177,7 +177,7 @@ resource "aws_lb_target_group" "external_lb_tg_kubeapi" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-external-lb-tg-kubeapi")
+      "Name" = lower("${var.common_prefix}-ext-lb-tg-kubeapi-${var.environment}")
     }
   )
 }

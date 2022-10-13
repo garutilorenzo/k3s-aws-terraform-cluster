@@ -13,7 +13,7 @@ resource "aws_vpc_endpoint" "vpce_secretsmanager" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-secretsmanager-vpce")
+      "Name" = lower("${var.common_prefix}-secretsmanager-vpce-${var.environment}")
     }
   )
 }

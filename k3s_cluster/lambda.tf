@@ -1,7 +1,7 @@
-resource "aws_lambda_function" "k8s_cleaner_lambda_function" {
-  function_name    = "k8s_cleaner_lambda_function"
-  filename         = "${path.module}/lambda/k8s_cleaner.zip"
-  source_code_hash = filebase64sha256("${path.module}/lambda/k8s_cleaner.zip")
+resource "aws_lambda_function" "kube_cleaner_lambda_function" {
+  function_name    = "${var.common_prefix}-kube-cleaner-${var.environment}"
+  filename         = "${path.module}/lambda/kube_cleaner.zip"
+  source_code_hash = filebase64sha256("${path.module}/lambda/kube_cleaner.zip")
   handler          = "lambda.lambda_handler"
   runtime          = "python3.9"
   timeout          = 5
@@ -12,7 +12,7 @@ resource "aws_lambda_function" "k8s_cleaner_lambda_function" {
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
 
-  role = aws_iam_role.k8s_cleaner_lambda_role.arn
+  role = aws_iam_role.kube_cleaner_lambda_role.arn
 
   environment {
     variables = {
@@ -25,12 +25,12 @@ resource "aws_lambda_function" "k8s_cleaner_lambda_function" {
   tags = merge(
     local.global_tags,
     {
-      "Name" = lower("${local.common_prefix}-k8s-cleaner")
+      "Name" = lower("${var.common_prefix}-kube-cleaner-${var.environment}")
     }
   )
 }
 
 resource "aws_lambda_event_source_mapping" "trigger_lambda_on_ec2_interruption" {
   event_source_arn = aws_sqs_queue.ec2_spot_interruption_warn_queue.arn
-  function_name    = aws_lambda_function.k8s_cleaner_lambda_function.arn
+  function_name    = aws_lambda_function.kube_cleaner_lambda_function.arn
 }
