@@ -76,11 +76,11 @@ resource "aws_sqs_queue_policy" "ec2_spot_interruption_warn_queue_policy" {
 
 resource "aws_cloudwatch_event_rule" "ec2_spot_request_fulfillment" {
   name        = "${var.common_prefix}-ec2-spot-fulfillment-${var.environment}"
-  description = "Capture EC2 Spot Interruption warning"
+  description = "Capture EC2 Spot Request Fulfillment"
 
   event_pattern = jsonencode({
     source      = ["aws.ec2"],
-    detail-type = ["EC2 Spot Instance Interruption Warning"]
+    detail-type = ["EC2 Spot Instance Request Fulfillment"]
   })
 
   tags = merge(
