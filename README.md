@@ -332,11 +332,11 @@ and see all the nodes provisioned.
 
 Optional resources can be deployed on the clustr:
 
-* Node termination Handler
-* Nginx ingress controller
-* Cert-manager
-* AWS EFS csi driver # https://github.com/kubernetes-sigs/aws-efs-csi-driver.git
-* Cluster autoscaler (optional/manual deploy)
+* [Node termination Handler](#node-termination-handler)
+* [Nginx ingress controller](#nginx-ingress-controller)
+* [Cert-manager](#cert-manager)
+* [AWS EFS csi drive](#aws-efs-csi-driver)
+* [Cluster autoscaler (optional/manual deploy)](#cluster-autoscaler-optionalmanual-deploy)
 
 ### Node termination Handler
 
