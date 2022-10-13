@@ -36,6 +36,7 @@ override.tf.json
 terraform.rc
 
 *.json
+!docs/*
 
 *Pipfile
 *Pipfile.lock
