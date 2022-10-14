@@ -24,7 +24,7 @@ module "k3s_cluster" {
   expose_kubeapi            = "<true|false>"
   efs_persistent_storage    = "<true|false>"
   certmanager_email_address = "<change_me>"
-  source                    = "../"
+  source                    = "./k3s_cluster/"
 }
 
 output "elb_dns_name" {
