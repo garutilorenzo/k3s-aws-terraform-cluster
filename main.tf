@@ -24,7 +24,7 @@ module "k3s_cluster" {
   expose_kubeapi            = "<true|false>"
   efs_persistent_storage    = "<true|false>"
   certmanager_email_address = "<change_me>"
-  source                    = "github.com/garutilorenzo/k3s-aws-terraform-cluster"
+  source                    = "../"
 }
 
 output "elb_dns_name" {
