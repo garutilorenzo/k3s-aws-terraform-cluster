@@ -39,7 +39,7 @@ check_os
 
 if [[ "$operating_system" == "ubuntu" ]]; then
   apt-get update
-  apt-get install -y software-properties-common unzip
+  apt-get install -y software-properties-common unzip nfs-common jq
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   unzip awscliv2.zip

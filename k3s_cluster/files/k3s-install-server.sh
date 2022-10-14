@@ -245,13 +245,14 @@ if [[ "$first_instance" == "$instance_id" ]]; then
   git checkout tags/${efs_csi_driver_release} -b kube_deploy_${efs_csi_driver_release}
   kubectl apply -k deploy/kubernetes/overlays/stable/
 
+  # Uncomment this to mount the EFS share on the first k3s-server node
   # mkdir /efs
   # aws_region="$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)"
   # mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${efs_filesystem_id}.efs.$aws_region.amazonaws.com:/ /efs
 fi
 %{ endif }
 
-# TEST AWS SECRET MANAGER
+# Upload kubeconfig on AWS secret manager
 if [[ "$first_instance" == "$instance_id" ]]; then
   cat /etc/rancher/k3s/k3s.yaml | sed 's/server: https:\/\/127.0.0.1:6443/server: https:\/\/${k3s_url}:6443/' > /root/k3s_lb.yaml
   aws secretsmanager update-secret --secret-id ${kubeconfig_secret_name} --secret-string file:///root/k3s_lb.yaml
