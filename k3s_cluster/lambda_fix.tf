@@ -7,6 +7,6 @@ resource "null_resource" "assign_default_sg" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "/bin/bash ${path.module}/files/update-lambda-sg.sh ${self.triggers.vpc_id} ${self.triggers.lambda_sg}"
+    command = "${path.module}/files/update-lambda-sg.sh ${self.triggers.vpc_id} ${self.triggers.lambda_sg}"
   }
 }
