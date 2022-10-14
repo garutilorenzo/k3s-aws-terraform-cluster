@@ -36,6 +36,11 @@ override.tf.json
 terraform.rc
 
 *.json
+!docs/*
 
 *Pipfile
 *Pipfile.lock
+
+k3s_cluster/lambda/kube_cleaner.zip
+k3s_cluster/lambda/kube_cleaner_src/*
+!k3s_cluster/lambda/kube_cleaner_src/lambda.py

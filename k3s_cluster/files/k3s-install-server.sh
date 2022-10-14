@@ -135,7 +135,7 @@ check_os
 
 if [[ "$operating_system" == "ubuntu" ]]; then
   apt-get update
-  apt-get install -y software-properties-common unzip
+  apt-get install -y software-properties-common unzip git nfs-common jq
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   unzip awscliv2.zip
@@ -144,7 +144,7 @@ if [[ "$operating_system" == "ubuntu" ]]; then
 fi
 
 if [[ "$operating_system" == "amazonlinux" ]]; then
-  yum install -y unzip curl jq
+  yum install -y unzip curl jq git
   aws_region="$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)"
   export AWS_DEFAULT_REGION=$aws_region
 fi
@@ -165,6 +165,10 @@ k3s_install_params+=("--kubelet-arg provider-id=aws:///$provider_id")
 
 %{ if install_nginx_ingress } 
 k3s_install_params+=("--disable traefik")
+%{ endif }
+
+%{ if expose_kubeapi }
+k3s_install_params+=("--tls-san ${k3s_tls_san_public}")
 %{ endif }
 
 INSTALL_PARAMS="$${k3s_install_params[*]}"
@@ -233,6 +237,26 @@ if [[ "$first_instance" == "$instance_id" ]]; then
   kubectl create -f /root/staging_issuer.yaml
 fi
 %{ endif }
+
+%{ if efs_persistent_storage }
+if [[ "$first_instance" == "$instance_id" ]]; then
+  git clone https://github.com/kubernetes-sigs/aws-efs-csi-driver.git
+  cd aws-efs-csi-driver/
+  git checkout tags/${efs_csi_driver_release} -b kube_deploy_${efs_csi_driver_release}
+  kubectl apply -k deploy/kubernetes/overlays/stable/
+
+  # Uncomment this to mount the EFS share on the first k3s-server node
+  # mkdir /efs
+  # aws_region="$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)"
+  # mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${efs_filesystem_id}.efs.$aws_region.amazonaws.com:/ /efs
+fi
+%{ endif }
+
+# Upload kubeconfig on AWS secret manager
+if [[ "$first_instance" == "$instance_id" ]]; then
+  cat /etc/rancher/k3s/k3s.yaml | sed 's/server: https:\/\/127.0.0.1:6443/server: https:\/\/${k3s_url}:6443/' > /root/k3s_lb.yaml
+  aws secretsmanager update-secret --secret-id ${kubeconfig_secret_name} --secret-string file:///root/k3s_lb.yaml
+fi
 
 %{ endif }
 

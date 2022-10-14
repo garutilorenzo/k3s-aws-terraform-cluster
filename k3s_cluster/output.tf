@@ -1,5 +1,5 @@
 output "elb_dns_name" {
-  value       = var.create_extlb ? aws_lb.external-lb.*.dns_name : []
+  value       = var.create_extlb ? aws_lb.external_lb.*.dns_name : []
   description = "ELB public DNS name"
 }
 

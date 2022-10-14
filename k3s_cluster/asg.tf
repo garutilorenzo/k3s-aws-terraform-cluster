@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "k3s_servers_asg" {
-  name                      = "k3s_servers"
+  name                      = "${var.common_prefix}-servers-asg-${var.environment}"
   wait_for_capacity_timeout = "5m"
   vpc_zone_identifier       = var.vpc_subnets
 
@@ -39,21 +39,18 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
   health_check_type         = "EC2"
   force_delete              = true
 
+  dynamic "tag" {
+    for_each = local.global_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
   tag {
     key                 = "Name"
-    value               = "${var.cluster_name}-k3s-server-${var.environment}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "provisioner"
-    value               = "terraform"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "environment"
-    value               = var.environment
+    value               = "${var.common_prefix}-server-${var.environment}"
     propagate_at_launch = true
   }
 
@@ -77,8 +74,13 @@ resource "aws_autoscaling_group" "k3s_servers_asg" {
 }
 
 resource "aws_autoscaling_group" "k3s_workers_asg" {
-  name                = "k3s_workers"
+  name                = "${var.common_prefix}-workers-asg-${var.environment}"
   vpc_zone_identifier = var.vpc_subnets
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes        = [load_balancers, target_group_arns]
+  }
 
   mixed_instances_policy {
     instances_distribution {
@@ -89,7 +91,7 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
 
     launch_template {
       launch_template_specification {
-        launch_template_id = aws_launch_template.k3s_agent.id
+        launch_template_id = aws_launch_template.k3s_worker.id
         version            = "$Latest"
       }
 
@@ -111,21 +113,18 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
   health_check_type         = "EC2"
   force_delete              = true
 
+  dynamic "tag" {
+    for_each = local.global_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
   tag {
     key                 = "Name"
-    value               = "${var.cluster_name}-k3s-worker-${var.environment}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "provisioner"
-    value               = "terraform"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "environment"
-    value               = var.environment
+    value               = "${var.common_prefix}-worker-${var.environment}"
     propagate_at_launch = true
   }
 

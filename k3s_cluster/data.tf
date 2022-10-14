@@ -7,8 +7,23 @@ data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
   arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
 }
 
+data "aws_iam_policy" "AWSLambdaVPCAccessExecutionRole" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
 data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
   arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+data "aws_iam_policy_document" "lambda_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
 }
 
 data "aws_instances" "k3s_servers" {
@@ -64,15 +79,21 @@ data "template_cloudinit_config" "k3s_server" {
       install_nginx_ingress            = var.install_nginx_ingress,
       nginx_ingress_release            = var.nginx_ingress_release,
       install_certmanager              = var.install_certmanager,
+      efs_persistent_storage           = var.efs_persistent_storage,
+      efs_csi_driver_release           = var.efs_csi_driver_release,
+      efs_filesystem_id                = var.efs_persistent_storage ? aws_efs_file_system.k3s_persistent_storage[0].id : "",
       certmanager_release              = var.certmanager_release,
       certmanager_email_address        = var.certmanager_email_address,
-      k3s_url                          = aws_lb.k3s-server-lb.dns_name,
-      k3s_tls_san                      = aws_lb.k3s-server-lb.dns_name
+      expose_kubeapi                   = var.expose_kubeapi,
+      k3s_tls_san_public               = local.k3s_tls_san_public,
+      k3s_url                          = aws_lb.k3s_server_lb.dns_name,
+      k3s_tls_san                      = aws_lb.k3s_server_lb.dns_name,
+      kubeconfig_secret_name           = local.kubeconfig_secret_name
     })
   }
 }
 
-data "template_cloudinit_config" "k3s_agent" {
+data "template_cloudinit_config" "k3s_worker" {
   gzip          = true
   base64_encode = true
 
@@ -85,13 +106,13 @@ data "template_cloudinit_config" "k3s_agent" {
 
   part {
     content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/files/k3s-install-agent.sh", {
+    content = templatefile("${path.module}/files/k3s-install-worker.sh", {
       k3s_version   = var.k3s_version,
       k3s_token     = random_password.k3s_token.result,
       k3s_subnet    = var.k3s_subnet,
       is_k3s_server = false,
-      k3s_url       = aws_lb.k3s-server-lb.dns_name,
-      k3s_tls_san   = aws_lb.k3s-server-lb.dns_name
+      k3s_url       = aws_lb.k3s_server_lb.dns_name,
+      k3s_tls_san   = aws_lb.k3s_server_lb.dns_name
     })
   }
 }
