@@ -26,7 +26,7 @@ Deploy in a few minutes an high available K3s cluster on Amazon AWS using mixed 
 * [Amazon AWS Account](https://aws.amazon.com/it/console/) - Amazon AWS account with billing enabled
 * [kubectl](https://kubernetes.io/docs/tasks/tools/) - The Kubernetes command-line tool (optional)
 * [Python pip package](https://pypi.org/project/pip/) - Python package installer (python3-pip under Ubuntu distro)
-* [aws cli](https://aws.amazon.com/cli/) optional
+* [aws cli](https://aws.amazon.com/cli/) - the cli is needed to fix [this](https://github.com/hashicorp/terraform-provider-aws/issues/10329) problem.
 
 ## Before you start
 
@@ -48,6 +48,12 @@ build the lambda package (not provided in this repo):
 pip install --target k3s_cluster/lambda/kube_cleaner_src/ kubernetes
 cd k3s_cluster/lambda/kube_cleaner_src/
 zip -r ../kube_cleaner.zip .
+```
+
+[configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) the aws cli:
+
+```
+aws cli configure
 ```
 
 edit the main.tf files and set the following variables:
