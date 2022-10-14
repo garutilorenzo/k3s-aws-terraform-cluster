@@ -79,8 +79,8 @@ edit the main.tf files and set the following variables:
 | `expose_kubeapi`  | `no`  | Boolean value, default false. Expose or not the kubeapi server to the internet. Access is granted only from *my_public_ip_cidr* for security reasons. |
 | `PATH_TO_PUBLIC_KEY`     | `no`       | Path to your public ssh key (Default: "~/.ssh/id_rsa.pub) |
 | `PATH_TO_PRIVATE_KEY` | `no`        | Path to your private ssh key (Default: "~/.ssh/id_rsa) |
-| `default_instance_type` | `no`        | Default instance type used by the Launch template. Default: t3.large |
-| `instance_types` | `no`        | Array of instances used by the ASG. Dfault: { asg_instance_type_1 = "t3.large", asg_instance_type_3 = "m4.large", asg_instance_type_4 = "t3a.large" } |
+| `default_instance_type` | `no`        | Default instance type used by the Launch template. Default: t3.medium |
+| `instance_types` | `no`        | Array of instances used by the ASG. Dfault: { asg_instance_type_1 = "t3.medium", asg_instance_type_2 = "t3a.medium", asg_instance_type_2 = "c5a.large", asg_instance_type_4 = "c6a.large" } |
 | `kube_api_port` | `no`        | Kube api default port Default: 6443|
 | `k3s_server_desired_capacity` | `no`        | Desired number of k3s servers. Default 3 |
 | `k3s_server_min_capacity` | `no`        | Min number of k3s servers: Default 4 |
@@ -373,7 +373,9 @@ spec:
   type: LoadBalancer
 ```
 
-To get the real ip address of the clients using a public L4 load balancer we need to use the proxy protocol feature of nginx ingress controller:
+**NOTE** with k3s is possible to expose "protected ports* via LoadBalancer. More info [here](https://docs.k3s.io/networking#service-load-balancer)
+
+To get the real ip address of the clients using a public L4 load balancer the installer enables the Nginx proxy-prtocol:
 
 ```yaml
 ---
@@ -383,7 +385,7 @@ data:
   enable-real-ip: "true"
   proxy-real-ip-cidr: "0.0.0.0/0"
   proxy-body-size: "20m"
-  use-proxy-protocol: "true"
+  use-proxy-protocol: "true" # <- this value is set to *true* to get the real ip address of the client
 kind: ConfigMap
 metadata:
   labels:
@@ -398,7 +400,7 @@ metadata:
   namespace: ingress-nginx
 ```
 
-and enable the proxy protocol on the load balancer target group, *proxy_protocol_v2* set to true.
+**NOTE** the proxy protocol on the load balancer target group is enabled: *proxy_protocol_v2* set to true.
 
 ### Cert-manager
 
