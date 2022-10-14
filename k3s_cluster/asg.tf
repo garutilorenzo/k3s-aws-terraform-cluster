@@ -91,7 +91,7 @@ resource "aws_autoscaling_group" "k3s_workers_asg" {
 
     launch_template {
       launch_template_specification {
-        launch_template_id = aws_launch_template.k3s_agent.id
+        launch_template_id = aws_launch_template.k3s_worker.id
         version            = "$Latest"
       }
 

@@ -93,7 +93,7 @@ data "template_cloudinit_config" "k3s_server" {
   }
 }
 
-data "template_cloudinit_config" "k3s_agent" {
+data "template_cloudinit_config" "k3s_worker" {
   gzip          = true
   base64_encode = true
 
@@ -106,7 +106,7 @@ data "template_cloudinit_config" "k3s_agent" {
 
   part {
     content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/files/k3s-install-agent.sh", {
+    content = templatefile("${path.module}/files/k3s-install-worker.sh", {
       k3s_version   = var.k3s_version,
       k3s_token     = random_password.k3s_token.result,
       k3s_subnet    = var.k3s_subnet,
