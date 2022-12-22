@@ -56,7 +56,7 @@ data "aws_instances" "k3s_workers" {
   instance_state_names = ["running"]
 }
 
-data "template_cloudinit_config" "k3s_server" {
+data "cloudinit_config" "k3s_server" {
   gzip          = true
   base64_encode = true
 
@@ -93,7 +93,7 @@ data "template_cloudinit_config" "k3s_server" {
   }
 }
 
-data "template_cloudinit_config" "k3s_worker" {
+data "cloudinit_config" "k3s_worker" {
   gzip          = true
   base64_encode = true
 
